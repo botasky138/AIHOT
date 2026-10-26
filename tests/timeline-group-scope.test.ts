@@ -11,7 +11,7 @@ after(closeDb);
 
 test("timeline grouping preserves evidence scope and filter-local anchors", async () => {
   const prefix = `timeline-scope-${tag()}`;
-  const at = new Date("2026-01-01T00:00:00Z");
+  const at = new Date("2026-10-24T00:00:00Z"); // on/after LISTING_FLOOR_BEIJING_DATE
   const now = new Date(+at + 100_000);
   await sql`INSERT INTO sources (id, name, kind, tier) VALUES (${prefix}, ${prefix}, 'rss', 'T1')`;
   const [fact] = await sql<{ id: number }[]>`INSERT INTO facts (public_id, title) VALUES (${prefix}, ${prefix}) RETURNING id`;

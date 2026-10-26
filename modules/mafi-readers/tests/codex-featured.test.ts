@@ -1,14 +1,31 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { CodexEvent } from "../contracts.ts";
 import { pickFeaturedCodexEvent } from "../web/codex-featured.ts";
 
-function ev(partial) {
+function ev(partial: {
+  id: string;
+  status: CodexEvent["status"];
+  pres?: NonNullable<CodexEvent["presentation"]>["status"];
+  createdAt: string;
+  confirmedAt?: string | null;
+  title?: string;
+  estimate?: CodexEvent["estimate"];
+}): CodexEvent {
   return {
     id: partial.id,
     type: "direct_reset",
-    label: "reset",
     displayLabel: "重置",
-    presentation: { status: partial.pres ?? partial.status, scopeKnown: false, scopeLabel: null, kindExplicit: false, timeInferred: false, audienceZh: null, productsZh: null },
+    presentation: {
+      status: partial.pres ?? (partial.status === "confirmed" ? "confirmed" : "announced"),
+      scopeKnown: false,
+      scopeLabel: null,
+      kindExplicit: false,
+      timeInferred: false,
+      audienceZh: null,
+      productsZh: null,
+      reportedAt: null,
+    },
     status: partial.status,
     title: partial.title ?? partial.id,
     createdAt: partial.createdAt,

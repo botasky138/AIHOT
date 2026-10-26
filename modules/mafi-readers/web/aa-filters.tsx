@@ -39,7 +39,7 @@ function CheckboxMark({ checked, indeterminate = false }: { checked: boolean; in
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${on ? "border-accent bg-accent text-accent-contrast" : "border-line-strong bg-transparent"}`}
+      className={`inline-flex size-4 shrink-0 items-center justify-center rounded-mark border transition-colors ${on ? "border-accent bg-accent text-accent-contrast" : "border-line-strong bg-transparent"}`}
     >
       {indeterminate && !checked ? <IconMinus size={11} strokeWidth={3} /> : checked ? <IconCheck size={11} strokeWidth={3} /> : null}
     </span>
@@ -350,7 +350,7 @@ export function DarkModelTreeSelect({
                     <button
                       type="button"
                       aria-label={orgOpen ? `折叠 ${org.name}` : `展开 ${org.name}`}
-                      className="inline-flex size-6 shrink-0 items-center justify-center rounded text-ink-4 hover:text-ink"
+                      className="inline-flex size-6 shrink-0 items-center justify-center rounded-mark text-ink-4 hover:text-ink"
                       onClick={() => toggleOrgOpen(org.key)}
                     >
                       <IconChevronRight size={14} className={`transition-transform ${orgOpen ? "rotate-90" : ""}`} />
@@ -396,7 +396,7 @@ export function DarkModelTreeSelect({
                               <button
                                 type="button"
                                 aria-label={familyOpen ? `折叠 ${family.name}` : `展开 ${family.name}`}
-                                className="inline-flex size-6 shrink-0 items-center justify-center rounded text-ink-4 hover:text-ink"
+                                className="inline-flex size-6 shrink-0 items-center justify-center rounded-mark text-ink-4 hover:text-ink"
                                 onClick={() => toggleFamilyOpen(familyKey)}
                               >
                                 <IconChevronRight size={14} className={`transition-transform ${familyOpen ? "rotate-90" : ""}`} />

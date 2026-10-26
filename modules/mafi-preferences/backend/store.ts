@@ -4,7 +4,7 @@ import { sourceWeight } from "./weights.ts";
 
 export async function ensureDeviceRow(deviceId: string, db: Db = sql): Promise<void> {
   await db`
-    INSERT INTO mafi_preference_devices (device_id) VALUES (${deviceId})
+    INSERT INTO mafi_preference_devices (device_id, user_id) VALUES (${deviceId}, null)
     ON CONFLICT (device_id) DO UPDATE SET updated_at = now()`;
 }
 

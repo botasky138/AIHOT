@@ -11,7 +11,7 @@ function MarkGlyph({ size }: { size: number }) {
       viewBox="0 0 512 512"
       width={px}
       height={px}
-      className="mr-[0.35em] shrink-0 rounded-[22%]"
+      className="mr-[0.35em] shrink-0"
       aria-hidden="true"
       role="presentation"
     >
