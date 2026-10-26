@@ -5,10 +5,10 @@ import { REPORTS, SITE, withSubject } from "@aihot/site";
 import { sql } from "../db.ts";
 import { cached, type Cached } from "../lib/cache.ts";
 import { proxiedImage, proxiedImageSet } from "../media/imgproxy.ts";
-import { isoWeekRange, monthRange } from "@aihot/contracts/time";
+import { beijingDate, isoWeekLabel, isoWeekRange, monthRange } from "@aihot/contracts/time";
 import { dailyUrl, itemUrl, periodUrl, siteUrl } from "./links.ts";
 import { publicSourceName } from "./rules.ts";
-import { listedCondition } from "./scope.ts";
+import { listedCondition, LISTING_FLOOR_BEIJING_DATE } from "./scope.ts";
 
 export type { ReportKind };
 
@@ -421,6 +421,22 @@ export async function listReports(kind: ReportKind, limit = INDEX_LIMIT): Promis
   }));
 }
 
+/** /daily (and period latest): issues on/after LISTING_FLOOR_BEIJING_DATE; /daily/archive still uses listReports. */
+export async function listReportsTodayOnward(kind: ReportKind, limit = INDEX_LIMIT, now = new Date()): Promise<ReportIndexEntry[]> {
+  const all = await listReports(kind, limit);
+  if (kind === "daily") {
+    return all.filter((e) => e.key >= LISTING_FLOOR_BEIJING_DATE);
+  }
+  if (kind === "monthly") {
+    const month = beijingDate(now).slice(0, 7);
+    return all.filter((e) => e.key >= month);
+  }
+  // weekly: keep issues whose week label is current ISO week or later
+  const week = isoWeekLabel(beijingDate(now));
+  return all.filter((e) => e.key >= week);
+}
+
+
 // v1
 
 const attribution = (url: string) => ({ name: SITE.name, url });
@@ -656,3 +672,5 @@ export async function loadReportNavigation(kind: ReportKind, key: string) {
 export async function loadReportMonth(kind: ReportKind, month: string) {
   return (await listReports(kind)).filter((e) => e.key.startsWith(month)).map(({ key, issueNumber, title }) => ({ key, issueNumber, title }));
 }
+
+

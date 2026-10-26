@@ -1,6 +1,6 @@
 // The about page's river. Every line is one of the site's real sources (hover names it). Lines run in
 // from the left, gather into bundles (many reports of one story), meet the 精选 gate that lets a few
-// bundles through, and the ones that pass turn teal and run into a small newspaper: the day's report.
+// bundles through, and the ones that pass turn gold and run into a small newspaper: the day's report.
 // Pulses carry items along the lines; most stop at the gate, and each that reaches the paper calls
 // onArrive (the page brings up the next latest 精选). The four stages line up with the columns under
 // the canvas, and `focus` lights one of them. On first sight the river flows in from the left once.
@@ -167,7 +167,7 @@ function readColors(probe: CanvasRenderingContext2D): Colors {
   const bg = parse(getComputedStyle(document.body).backgroundColor, [250, 249, 246]);
   return {
     ink: parse(root.getPropertyValue("--ink").trim(), [32, 42, 48]),
-    accent: parse(root.getPropertyValue("--accent").trim(), [23, 107, 117]),
+    accent: parse(root.getPropertyValue("--accent").trim(), [201, 162, 39]),
     line: parse(root.getPropertyValue("--line-strong").trim(), [200, 205, 205]),
     surface: parse(root.getPropertyValue("--surface").trim(), [255, 255, 255]),
     bg,

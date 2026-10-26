@@ -79,7 +79,7 @@ services:
       WEB_HOST: 0.0.0.0
       WEB_PORT: "3000"
     ports:
-      - "${PORT:-3000}:3000"
+      - "${PORT:-127.0.0.1:3000}:3000"
     depends_on:
       api:
         condition: service_started

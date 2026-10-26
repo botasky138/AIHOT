@@ -145,7 +145,8 @@ test('a recently misdated old article returns to history without new analysis or
   assert.equal(a!.backfill,true);
   assert.equal(a!.backfill_reason,'stale-on-discovery');
   const [p]=await sql`SELECT published_at,sort_at,backfill,selected FROM publications WHERE article_id=${id}`;
-  assert.equal(p!.sort_at.toISOString(),corrected);
+  assert.equal(p!.sort_at.toISOString(),(await sql`SELECT discovered_at FROM articles WHERE id=${id}`)[0]!.discovered_at.toISOString(),
+    'backfill discovered on/after listing floor keeps discovery sort_at for /all (timeline_at stays archival)');
   assert.equal(p!.backfill,true);
   assert.equal(p!.selected,true,'the existing editorial judgement remains available in history');
   assert.equal((await sql`SELECT 1 FROM fact_articles WHERE article_id=${id}`).length,0);

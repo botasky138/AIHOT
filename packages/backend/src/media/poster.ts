@@ -20,7 +20,7 @@ export interface Poster {
 }
 
 const INK = "#0e191b";
-const ACCENT = "#176b75";
+const ACCENT = "#c9a227";
 
 async function tree(p: Poster): Promise<Node> {
   const title = clamp(p.title, 72);
@@ -51,7 +51,7 @@ async function tree(p: Poster): Promise<Node> {
         h("div", { width: 12, height: 12, borderRadius: 999, backgroundColor: ACCENT, marginRight: 16 }),
         h("div", { display: "flex", fontSize: 30, fontWeight: 700, color: ACCENT, letterSpacing: 1 }, clamp(p.kicker, 20)),
         p.score !== null
-          ? h("div", { display: "flex", marginLeft: 20, padding: "4px 16px", borderRadius: 999, backgroundColor: "rgba(23,107,117,0.09)", fontSize: 26, color: "#0f5a63" }, `精选 · ${Math.round(p.score)} 分`)
+          ? h("div", { display: "flex", marginLeft: 20, padding: "4px 16px", borderRadius: 999, backgroundColor: "rgba(201,162,39,0.12)", fontSize: 26, color: "#8a6e14" }, `精选 · ${Math.round(p.score)} 分`)
           : null,
       ].filter(Boolean)),
       h("div", { display: "flex", marginTop: 30, fontSize: titleSize, fontWeight: 700, lineHeight: 1.3, color: INK }, title),

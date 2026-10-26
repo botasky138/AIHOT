@@ -51,7 +51,7 @@ export const SELECTION = {
 | `samplingContext` | 可选。`benchmarkSplit` 分开发集和留出集，`samplingStratum` 是你自己的分组（比如“新规”“判决”“营销”），看错在哪一类 |
 | `gold.decision` | `select` 该选，`reject` 不该选，`either` 两可（不计入准确率） |
 
-`industry/gold.example.jsonl` 有两条示例。
+`industry/gold.example.jsonl` 仅示范格式，其中的虚构条目不能当作真实人工金标或校准证据。
 
 几条建议：
 

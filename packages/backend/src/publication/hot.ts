@@ -7,7 +7,7 @@ import { storedHotRanking, tierRank, type HotEntry, type HotRanking } from "../e
 import { shared } from "../lib/cache.ts";
 import { proxiedImage, proxiedImageSet } from "../media/imgproxy.ts";
 import { publicSourceName } from "./rules.ts";
-import { evidenceCondition, listedCondition } from "./scope.ts";
+import { evidenceCondition, listedCondition, listingDayFloor } from "./scope.ts";
 import { storyTexts } from "./story-text.ts";
 
 // Concurrent reads are shared, nothing more: public words follow withdrawals and regrouping at once.
@@ -112,9 +112,12 @@ export async function rankingExtras(ranking: HotRanking) {
 /** Home "current hot" strip: 3–5 entries from the same ranking, hidden when there are fewer than 3. */
 export async function loadHotStrip(): Promise<HotStripEntry[] | null> {
   const ranking = await latestHotRanking();
-  if (!ranking || ranking.entries.length < 3) return null;
-  const extras = await rankingExtras(ranking);
-  return ranking.entries.slice(0, 5).map((e) => ({
+  if (!ranking) return null;
+  const floorMs = listingDayFloor().getTime();
+  const freshEntries = ranking.entries.filter((e) => Date.parse(e.latestAt) >= floorMs);
+  if (freshEntries.length < 3) return null;
+  const extras = await rankingExtras({ ...ranking, entries: freshEntries });
+  return freshEntries.slice(0, 5).map((e) => ({
     rank: e.rank,
     title: e.title,
     heat: e.heat,
@@ -125,3 +128,40 @@ export async function loadHotStrip(): Promise<HotStripEntry[] | null> {
     participantCount: e.participantCount,
   }));
 }
+
+/** Home hot-strip window evidence for preference projection (entries with itemId only). */
+export interface HotStripReaderCandidate {
+  itemId: string;
+  sourceId: string;
+  publicBaseScore: number;
+  publicTimeMs: number;
+  groupKey: string;
+}
+
+export async function loadHotStripReaderWindow(): Promise<{
+  data: HotStripEntry[] | null;
+  candidates: HotStripReaderCandidate[];
+}> {
+  const data = await loadHotStrip();
+  if (!data?.length) return { data, candidates: [] };
+  const withItem = data.filter((e): e is HotStripEntry & { itemId: string } => !!e.itemId);
+  if (!withItem.length) return { data, candidates: [] };
+  const rows = await sql<{ article_id: string; source_id: string }[]>`
+    SELECT p.article_id, p.source_id FROM publications p
+    WHERE p.article_id IN ${sql(withItem.map((e) => e.itemId))}`;
+  const sourceById = new Map(rows.map((r) => [r.article_id, r.source_id]));
+  const candidates: HotStripReaderCandidate[] = [];
+  for (const e of withItem) {
+    const sourceId = sourceById.get(e.itemId);
+    if (!sourceId) continue;
+    candidates.push({
+      itemId: e.itemId,
+      sourceId,
+      publicBaseScore: e.heat,
+      publicTimeMs: 0,
+      groupKey: e.storyPublicId ?? e.itemId,
+    });
+  }
+  return { data, candidates };
+}
+

@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#13191c"/><path d="M256 92C271 199 313 241 420 256C313 271 271 313 256 420C241 313 199 271 92 256C199 241 241 199 256 92Z" fill="#2ce2e8"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MAFi">
+  <rect width="512" height="512" rx="112" fill="#0a0a0c"/>
+  <path d="M100 320V166h42l73 94 73-94h42v154h-43V231l-72 90-72-90v89z" fill="#e8d48b"/>
+  <path d="M385 200v120M416 200v120M447 200v120" fill="none" stroke="#c9a227" stroke-width="12" stroke-linecap="round"/>
+  <path d="M108 365h296" fill="none" stroke="#3a3a40" stroke-width="12" stroke-linecap="round"/>
+</svg>

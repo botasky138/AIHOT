@@ -1,0 +1,19 @@
+{
+  "name": "@aihot/mafi-preferences",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./contracts": "./contracts.ts",
+    "./module": "./module.ts",
+    "./server": "./server.ts",
+    "./web": "./web.tsx",
+    "./weights": "./backend/weights.ts"
+  },
+  "dependencies": {
+    "@aihot/backend": "*",
+    "@aihot/contracts": "*",
+    "@aihot/web": "*",
+    "react": "19.3.0",
+    "react-router": "8.4.0"
+  }
+}

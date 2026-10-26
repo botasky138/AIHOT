@@ -7,6 +7,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { after, test } from "node:test";
 import { closeDb, sql } from "@aihot/backend/db";
+import { PRESETS } from "@aihot/site/models";
 
 after(closeDb);
 
@@ -158,6 +159,7 @@ test("every environment variable the code reads is listed in a template, and eve
   ]);
   const read = envReads(production());
   const readAnywhere = new Set([...read, ...envReads(sources("scripts")),
+    ...Object.values(PRESETS).flatMap(({ baseUrlEnv, apiKeyEnv }) => [baseUrlEnv, apiKeyEnv]),
     ...[...production(), ...sources("scripts")].flatMap(({ text }) => matches(text, NAMED)),
     ...DEPLOYMENT.flatMap((file) => matches(readFileSync(path.join(ROOT, file), "utf8"), SUBSTITUTED))]);
   assert.deepEqual([...read].filter((name) => !listed.has(name) && !preset.has(name)), [], "list it in an environment template, or stop reading it");

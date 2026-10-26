@@ -108,7 +108,7 @@ export function organizationLd() {
     "@id": `${base}/#organization`,
     name: SITE.organization.name,
     url: base,
-    logo: `${base}/icon.png`,
+    logo: `${base}/icon-v2.png`,
     ...(founder ? {
       founder: {
         "@type": "Person",

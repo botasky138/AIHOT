@@ -62,6 +62,8 @@ MCP 默认接受 `SITE_URL` 的主机以及 `localhost`、`127.0.0.1`、`[::1]`�
 
 ### 更新
 
+MAFi 本机定制（2026-10-22）：AIHOT 资讯阅读页 /aihot 及 /api/mafi-readers/aihot 已移除，旧地址返回 404；全局链接与接入说明同步删除。停止旧 API 后，清理数据目录下 mafi-readers/aihot-selected.json、aihot-all.json、aihot-hot.json、aihot-daily.json、aihot-weekly.json、aihot-monthly.json 六份新闻缓存；保留 aa-models.json 与 codex-resets.json。这些可重新取得的外部新闻缓存会被删除，不删除业务文章、人工标注或历史验证材料，无数据库迁移。AA_API_KEY 仅填本机 .env，模板保持为空；重新构建 Web 并重启加载该配置的 API。
+
 新增选填的 `PRIVATE_FEED_HOSTS`：信源订阅或列表地址用自建在内网的服务（比如 RSSHub）时，把它的主机名写进去，不必再打开整站的 `ALLOW_PRIVATE_NETWORK_FETCH`，用法见 [信源](sources.md)。不设置时行为不变；无需数据库迁移。
 
 周报、月报的周期内，应有日报齐全且原始正文条目全部为空时，自动跳过该期，避免每半小时重复报错；归档里不会新增空周报或月报。首个周期从全站最早日报开始检查；没有可汇总条目时，若缺失日报、原有条目后来无法公开或正在人工更正，仍保留原有错误。无需数据库迁移或配置修改，升级后下次定时检查生效。

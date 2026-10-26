@@ -47,8 +47,8 @@ test("real grouped timeline pagination keeps whole-day counts across midnight", 
   const source = `day-counts-${T}`;
   const facts: number[] = [];
   const groups: Array<{ anchor: number; key: string }> = [];
-  const midnight = beijingMidnight("2024-02-29").getTime();
-  const now = new Date("2024-03-02T00:00:00Z");
+  const midnight = beijingMidnight("2026-10-25").getTime(); // was leap-day; must be on/after listing floor
+  const now = new Date("2026-10-27T00:00:00Z");
   await sql`INSERT INTO sources(id,name,kind,tier) VALUES(${source},'Day counts','rss','T1')`;
   const add = async (index: string, at: number, fact: number | null = null, story: number | null = null) => {
     const id = `${T}-${index}`;

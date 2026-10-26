@@ -8,7 +8,7 @@ import { closeDb, sql } from "@aihot/backend/db";
 import { loadPool, publicMatchCondition, searchTerms } from "@aihot/backend/publication/pool";
 
 const T = `relevance-${tag()}`;
-const now = new Date("2026-01-01T12:00:00Z");
+const now = new Date("2026-10-26T12:00:00Z"); // on/after LISTING_FLOOR_BEIJING_DATE
 const id = (suffix: string) => `${T}-${suffix}`;
 const query = (q: string) => ({ channel: "all" as const, category: null, tag: null, tab: "relevance" as const, q, now });
 after(closeDb);
