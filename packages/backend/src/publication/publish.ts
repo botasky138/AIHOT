@@ -15,7 +15,7 @@ import { emit } from "../modules.ts";
 import {
   bodyModeOf, channelOf, displayTags, isIndexable, isPoolEligible, isSelectable, isIndependentSelectedSource, mayRedistribute, publicSourceName, type SourceFacts,
 } from "./rules.ts";
-import { foldableSelectionCondition, latestCompositeCondition, ownFactEvidenceCondition } from "./scope.ts";
+import { foldableSelectionCondition, latestCompositeCondition, listingDayFloor, ownFactEvidenceCondition } from "./scope.ts";
 
 interface ArticleRow {
   id: string;
@@ -313,7 +313,16 @@ export async function publishArticleTx(tx: Tx, articleId: string, options: Publi
   // Ordinary selected reports share their reading group's first arrival; independent articles keep
   // their own arrival and never date the ordinary group.
   let sortAt: Date = article.timeline_at;
-  if (selected && membership?.fact_id && !isIndependentSelectedSource(source.id)) {
+  // Stale/backfill keeps source time on timeline_at (card "published" date / archival), but public
+  // list order (homepage sort_at and /all pool) must use discovery — otherwise weeks-old changelogs
+  // bury today's collects on both / and /all.
+  const dayFloor = listingDayFloor(now);
+  // Discovery may promote backfill when *discovered* at/after listing floor (fixed LISTING_FLOOR_BEIJING_DATE+).
+  // Gate on discovered_at — not timeline_at — so freshly collected AI/GitHub changelogs whose
+  // source publish date is older still surface on /all and 精选; timeline_at stays archival.
+  if (article.backfill && article.discovered_at > sortAt && article.discovered_at >= dayFloor) {
+    sortAt = article.discovered_at;
+  } else if (selected && membership?.fact_id && !isIndependentSelectedSource(source.id)) {
     const [anchor] = await tx<{ t: Date | null }[]>`
       SELECT min(p.timeline_at) AS t FROM publications p
       WHERE p.fact_id = ${membership.fact_id} AND p.eligible AND p.visibility = 'public' AND p.article_id <> ${articleId}
@@ -321,12 +330,16 @@ export async function publishArticleTx(tx: Tx, articleId: string, options: Publi
     if (anchor?.t && anchor.t < sortAt) sortAt = anchor.t;
   }
 
+  // New admissions only when list time is on/after listing floor; already-selected older rows stay in DB (feeds filter them).
+  let effectiveSelected = selected;
+  if (selected && !previous?.selected && sortAt < dayFloor) effectiveSelected = false;
+
   const next = {
     source_id: source.id, first_party: source.tier === "T1",
-    visibility, eligible, selected, selection_candidate: selectionCandidate, title: title ?? collapseWhitespace(article.title), original_title: originalTitle, summary, reason,
+    visibility, eligible, selected: effectiveSelected, selection_candidate: selectionCandidate, title: title ?? collapseWhitespace(article.title), original_title: originalTitle, summary, reason: effectiveSelected ? reason : null,
     category, tags, score: round1(score), body_mode: bodyMode, story_id: membership?.story_id ?? null, fact_id: membership?.fact_id ?? null,
     indexable, url: article.url, channel, syndicate, published_at: article.published_at, discovered_at: article.discovered_at,
-    timeline_at: article.timeline_at, backfill: article.backfill, sort_at: sortAt, visible_after: visibleAfter,
+    timeline_at: article.timeline_at, backfill: article.backfill, sort_at: sortAt, visible_after: effectiveSelected ? visibleAfter : null,
   };
   const before = previous ? { ...previous, tags: [...previous.tags].sort(), score: previous.score === null ? null : Number(previous.score) } : null;
   const after = { ...next, tags: [...next.tags].sort() };
@@ -398,7 +411,7 @@ export async function publishArticleTx(tx: Tx, articleId: string, options: Publi
 
   // Content-group push: once, for an item that arrives live and becomes selected (never for imports,
   // backfill or stale-on-discovery material).
-  if (selected && !previous?.selected && !options.releasedAt && !article.backfill && visibility === "public") {
+  if (effectiveSelected && !previous?.selected && !options.releasedAt && !article.backfill && visibility === "public" && sortAt >= dayFloor) {
     await enqueue(QUEUES.notifySelected, { articleId }, { singletonKey: `selected:${articleId}`, startAfter: new Date(now.getTime() + 5_000) }, tx);
     // Prepare its images alongside the newly confirmed selection.
     await enqueue(QUEUES.prepareMedia, { articleId }, { singletonKey: `media:${articleId}` }, tx);
@@ -457,3 +470,4 @@ export async function republishSource(sourceId: string, onProgress?: (done: numb
   }
   return { total, changed, reduced };
 }
+

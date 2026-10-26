@@ -55,6 +55,8 @@ export interface ItemSummary {
   selected: boolean;
   channel: "news" | "x";
   story: StoryRef | null;
+  /** Present only on device-personalized responses; omitted on public cache payloads. */
+  myVote?: "up" | "down" | null;
 }
 
 /** The fields rendered by a site feed card; full original text lives in the item detail. */
@@ -67,6 +69,8 @@ export interface FeedItemSummary extends Pick<ItemSummary, "id" | "title" | "sum
    * so the card can say "同一件事，精选收录的是《…》" instead of claiming a seat of its own.
    */
   sameEvent?: { id: string; title: string } | null;
+  /** Present only on device-personalized responses; omitted on public cache payloads. */
+  myVote?: "up" | "down" | null;
 }
 
 export interface GroupInfo {
@@ -354,6 +358,28 @@ export interface ReportNavigationResponse {
 export interface SiteMeta {
   changelogVersion: string;
 }
+
+/** Traffic-light site/runtime health for the preview chrome (cheap; no LLM). */
+export type SiteStatusLight = "green" | "yellow" | "red";
+
+export interface SiteStatus {
+  light: SiteStatusLight;
+  /** Short Chinese label for the pill, e.g. 运行正常 / 已达额度上限·采集延迟·需关注·运行降级 / 服务异常. */
+  label: string;
+  /** One-line reason for operators / tooltip. */
+  detail: string;
+  db: "ok" | "down";
+  autoLoop: "running" | "dead" | "missing";
+  collect: "ok" | "stale" | "failing" | "unknown";
+  analyze: "ok" | "budget_paused" | "stale" | "unknown";
+  /** ISO times; null when unknown. */
+  lastCollectAt: string | null;
+  lastAnalyzeAt: string | null;
+  newestArticleAt: string | null;
+  checkedAt: string;
+}
+
+
 
 /** One entry of the site's changelog (site/changelog.json), newest first. */
 export interface ChangelogRelease {

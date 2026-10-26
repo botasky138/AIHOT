@@ -2,13 +2,13 @@
   "groups": [
     {
       "key": "company",
-      "name": "公司与模型",
-      "blurb": "按厂商追踪模型、产品与公司动态"
+      "name": "公司与机构",
+      "blurb": "追踪医疗监管与采购机构、国内外 AI 厂商、宏观与市场发布机构"
     },
     {
       "key": "field",
-      "name": "技术方向",
-      "blurb": "按技术领域深挖：Agent、多模态、具身智能……"
+      "name": "行业方向",
+      "blurb": "器械全行业与上海药政医保采购，手术室器械优先；AI、股票和黄金"
     },
     {
       "key": "genre",
@@ -214,7 +214,7 @@
         "开源生态",
         "开源/仓库"
       ],
-      "definition": "开放权重、能下载下来自己部署的模型，开源框架与 GitHub 上爆火的 AI 项目。"
+      "definition": "AI 开源代码、开放权重与许可证进展；分别核对授权范围。GitHub 热度不等于质量、性能或安全。"
     },
     {
       "slug": "engineering",
@@ -313,7 +313,7 @@
       "tags": [
         "现象/趋势"
       ],
-      "definition": "AI 正在改变什么：大家怎么用 AI、新能力的出现、对社会与市场格局的影响。"
+      "definition": "医疗器械、AI 与金融市场的新现象和趋势分析；观点与新闻事实、预测与实际结果分开。"
     },
     {
       "slug": "industry",
@@ -322,7 +322,7 @@
       "tags": [
         "行业动态"
       ],
-      "definition": "AI 圈的商业大事：融资并购、人事变动、合作与竞争、政策与市场变化。"
+      "definition": "医疗器械与 AI 的公司经营、融资并购、供需合作与竞争等具体产业变化。"
     },
     {
       "slug": "policy",
@@ -331,7 +331,382 @@
       "tags": [
         "政策/监管"
       ],
-      "definition": "AI 相关的政策法规与政府监管：立法进展、出口管制与全球治理。"
+      "definition": "医疗器械与医保、AI 治理、证券与期货市场等政策监管；区分征求意见、发布与生效。"
+    },
+    {
+      "slug": "github",
+      "name": "GitHub",
+      "group": "company",
+      "entityId": "github",
+      "definition": "GitHub 平台自身的产品与生态动态；托管仓库不代表 GitHub 是项目作者。"
+    },
+    {
+      "slug": "nmpa",
+      "name": "国家药监局 NMPA",
+      "group": "company",
+      "entityId": "nmpa",
+      "definition": "国家药品监督管理局发布的医疗器械监管、注册审批与质量安全信息。"
+    },
+    {
+      "slug": "cmde",
+      "name": "器审中心 CMDE",
+      "group": "company",
+      "entityId": "cmde",
+      "definition": "国家药监局医疗器械技术审评中心的技术审评、指导原则与通知；不将受理或审评进展等同获批。"
+    },
+    {
+      "slug": "nhsa",
+      "name": "国家医保局 NHSA",
+      "group": "company",
+      "entityId": "nhsa",
+      "definition": "国家医疗保障局的医保支付、价格治理与集中带量采购政策。"
+    },
+    {
+      "slug": "smpaa",
+      "name": "上海药事所 / 阳光采购",
+      "group": "company",
+      "entityId": "smpaa",
+      "definition": "上海市医药集中招标采购事务管理所（上海医药采购中心）及上海阳光医药采购网的公告；区分国家、联盟和上海项目。"
+    },
+    {
+      "slug": "nbs",
+      "name": "国家统计局 NBS",
+      "group": "company",
+      "entityId": "nbs",
+      "definition": "国家统计局的国内经济指标与修订发布，保留统计期、单位和同比环比口径。"
+    },
+    {
+      "slug": "pboc",
+      "name": "中国人民银行 PBOC",
+      "group": "company",
+      "entityId": "pboc",
+      "definition": "中国人民银行的货币政策、金融统计与政策操作。"
+    },
+    {
+      "slug": "safe",
+      "name": "国家外汇管理局 SAFE",
+      "group": "company",
+      "entityId": "safe",
+      "definition": "国家外汇管理局的外汇收支、国际收支与监管发布。"
+    },
+    {
+      "slug": "csrc",
+      "name": "中国证监会 CSRC",
+      "group": "company",
+      "entityId": "csrc",
+      "definition": "中国证券监督管理委员会的资本市场监管与制度发布。"
+    },
+    {
+      "slug": "sse",
+      "name": "上海证券交易所 SSE",
+      "group": "company",
+      "entityId": "sse",
+      "definition": "上海证券交易所的证券市场制度、公告与有时点的数据。"
+    },
+    {
+      "slug": "szse",
+      "name": "深圳证券交易所 SZSE",
+      "group": "company",
+      "entityId": "szse",
+      "definition": "深圳证券交易所的证券市场制度、公告与有时点的数据。"
+    },
+    {
+      "slug": "shfe",
+      "name": "上海期货交易所 SHFE",
+      "group": "company",
+      "entityId": "shfe",
+      "definition": "上海期货交易所的品种合约、交易与交割规则及市场数据，区分具体合约和主连。"
+    },
+    {
+      "slug": "cffex",
+      "name": "中国金融期货交易所 CFFEX",
+      "group": "company",
+      "entityId": "cffex",
+      "definition": "中国金融期货交易所的金融期货与期权制度、合约和市场数据。"
+    },
+    {
+      "slug": "fed",
+      "name": "美联储 Fed",
+      "group": "company",
+      "entityId": "fed",
+      "definition": "美联储政策、会议与公开发布，以及原文支持的境内外宏观影响。"
+    },
+    {
+      "slug": "bls",
+      "name": "美国劳工统计局 BLS",
+      "group": "company",
+      "entityId": "bls",
+      "definition": "美国劳工统计局的通胀、就业等指标，区分统计期、初值和修订值。"
+    },
+    {
+      "slug": "medical-devices",
+      "name": "医疗器械产业",
+      "group": "field",
+      "tags": [
+        "医疗器械",
+        "器械产业"
+      ],
+      "definition": "器械产业趋势、产品研发、临床证据与供应链变化，保留产品适用范围及证据边界。"
+    },
+    {
+      "slug": "medical-consumables",
+      "name": "医用耗材",
+      "group": "field",
+      "tags": [
+        "医用耗材"
+      ],
+      "definition": "医用耗材的产业、监管与采购进展；不把药品采购品种套用为耗材。"
+    },
+    {
+      "slug": "device-review",
+      "name": "器械注册与审评",
+      "group": "field",
+      "tags": [
+        "注册/审评"
+      ],
+      "definition": "区分受理、技术审评、创新审查与注册获批，核对公告主体和产品型号。"
+    },
+    {
+      "slug": "medical-insurance",
+      "name": "医保与支付",
+      "group": "field",
+      "tags": [
+        "医保/支付"
+      ],
+      "definition": "医保支付与价格治理的政策变化，区分发布与执行时间及适用范围。"
+    },
+    {
+      "slug": "volume-procurement",
+      "name": "集中带量采购",
+      "group": "field",
+      "tags": [
+        "带量采购",
+        "集采/采购"
+      ],
+      "definition": "上海器械、耗材及药品集采与通用采购规则，手术室器械优先；追踪明确影响上海的国家/联盟项目，保留品种、地区、阶段及执行时点。"
+    },
+    {
+      "slug": "shanghai-procurement",
+      "name": "上海医药采购",
+      "group": "field",
+      "tags": [
+        "上海采购"
+      ],
+      "definition": "上海器械、耗材及药品采购、挂网与接续，手术室器械优先；追踪国家、联盟及上海项目的适用范围、阶段与执行日，发布方所在地不等于采购适用地区。"
+    },
+    {
+      "slug": "github-trending",
+      "name": "GitHub AI 热点",
+      "group": "field",
+      "tags": [
+        "GitHub热点"
+      ],
+      "definition": "追踪 GitHub AI 仓库能力、版本与关注变化；星标仅代表热度，许可证与质量另核。"
+    },
+    {
+      "slug": "macro-economy",
+      "name": "国内指标与宏观",
+      "group": "field",
+      "tags": [
+        "宏观经济",
+        "国内指标"
+      ],
+      "definition": "国内经济指标和宏观发布，区分发布时间、统计期、修订值、季调与同比环比。"
+    },
+    {
+      "slug": "monetary-policy",
+      "name": "货币与财政政策",
+      "group": "field",
+      "tags": [
+        "货币政策",
+        "财政政策"
+      ],
+      "definition": "境内外货币与财政政策，区分宣布、实施与原文分析的市场影响。"
+    },
+    {
+      "slug": "global-macro",
+      "name": "海外宏观影响",
+      "group": "field",
+      "tags": [
+        "海外宏观"
+      ],
+      "definition": "境外指标与政策及其境内外影响，保留时区和发布口径，不从同时变化推断确定因果。"
+    },
+    {
+      "slug": "equities",
+      "name": "股票市场",
+      "group": "field",
+      "tags": [
+        "股票"
+      ],
+      "definition": "境内外股票市场事件、监管与有时点的数据，不提供个股买卖指令。"
+    },
+    {
+      "slug": "fixed-income",
+      "name": "债券与利率",
+      "group": "field",
+      "tags": [
+        "债券",
+        "利率"
+      ],
+      "definition": "与股票、黄金相关的债券和利率背景，保留价格、收益率、百分比、百分点和基点口径。"
+    },
+    {
+      "slug": "foreign-exchange",
+      "name": "外汇市场",
+      "group": "field",
+      "tags": [
+        "外汇"
+      ],
+      "definition": "与股票、黄金相关的汇率和外汇政策背景，保留报价方向、单位及截至时点。"
+    },
+    {
+      "slug": "futures",
+      "name": "期货与商品",
+      "group": "field",
+      "tags": [
+        "期货",
+        "商品"
+      ],
+      "definition": "重点黄金期货及对股票黄金有实质影响的衍生品事件，区分具体合约、主连换月、交易日和日夜盘。"
+    },
+    {
+      "slug": "options",
+      "name": "期权与衍生品",
+      "group": "field",
+      "tags": [
+        "期权"
+      ],
+      "definition": "期权等衍生品的合约与制度事件，不提供杠杆或交易指令。"
+    },
+    {
+      "slug": "procurement-updates",
+      "name": "集采进展",
+      "group": "genre",
+      "tags": [
+        "集采/采购"
+      ],
+      "definition": "按具体项目追踪采购进展，拟中选、正式中选与执行分别表述。"
+    },
+    {
+      "slug": "macro-releases",
+      "name": "宏观数据发布",
+      "group": "genre",
+      "tags": [
+        "宏观/数据"
+      ],
+      "definition": "有明确发布与统计口径的宏观数据，不把预测写成实绩。"
+    },
+    {
+      "slug": "market-updates",
+      "name": "市场动态",
+      "group": "genre",
+      "tags": [
+        "市场动态"
+      ],
+      "definition": "股债汇与期货的具体市场事件，新闻与延迟数据不称实时行情。"
+    },
+    {
+      "slug": "vllm",
+      "name": "vLLM",
+      "group": "company",
+      "entityId": "vllm",
+      "definition": "vLLM 推理服务框架的版本、部署、性能与兼容性进展，保留测试条件。"
+    },
+    {
+      "slug": "ollama",
+      "name": "Ollama",
+      "group": "company",
+      "entityId": "ollama",
+      "definition": "Ollama 本地模型运行工具的版本、模型支持与部署实践。"
+    },
+    {
+      "slug": "operating-room-devices",
+      "name": "手术室医疗器械",
+      "group": "field",
+      "tags": [
+        "手术室器械"
+      ],
+      "definition": "关注手术室设备、手术器械和耗材的趋势、注册、安全与采购；临床使用地点不代替法定注册分类。"
+    },
+    {
+      "slug": "surgical-instruments",
+      "name": "手术器械",
+      "group": "field",
+      "tags": [
+        "手术器械"
+      ],
+      "definition": "手术器械的研发、注册、安全、产业与采购变化，按原文明示产品及适用范围归类。"
+    },
+    {
+      "slug": "surgical-consumables",
+      "name": "手术耗材",
+      "group": "field",
+      "tags": [
+        "手术耗材"
+      ],
+      "definition": "手术相关耗材的供需、价格、集采与执行变化，不把药品采购结果套为耗材结果。"
+    },
+    {
+      "slug": "endoscopy",
+      "name": "内窥镜",
+      "group": "field",
+      "tags": [
+        "内窥镜"
+      ],
+      "definition": "内窥镜产品及相关器械的技术、证据、注册与采购变化，区分型号与适用范围。"
+    },
+    {
+      "slug": "anesthesia-monitoring",
+      "name": "麻醉与监护器械",
+      "group": "field",
+      "tags": [
+        "麻醉监护"
+      ],
+      "definition": "麻醉与监护设备的产业、注册、安全与采购信息；不含无器械关联的麻醉药品消息。"
+    },
+    {
+      "slug": "sge",
+      "name": "上海黄金交易所 SGE",
+      "group": "company",
+      "entityId": "sge",
+      "definition": "上海黄金交易所的制度与公告，行情是否可接入另行核实；上金所与上期所是不同交易所。"
+    },
+    {
+      "slug": "gold",
+      "name": "黄金市场",
+      "group": "field",
+      "tags": [
+        "黄金"
+      ],
+      "definition": "国内外黄金市场变化及宏观影响，区分现货、延期、期货、ETF、基准价和金饰零售价。"
+    },
+    {
+      "slug": "gold-spot",
+      "name": "黄金现货与延期",
+      "group": "field",
+      "tags": [
+        "黄金现货"
+      ],
+      "definition": "黄金现货和延期产品，保留具体市场、产品、报价单位、币种和时间口径，不能把延期视作普通实物现货交割。"
+    },
+    {
+      "slug": "gold-futures",
+      "name": "黄金期货",
+      "group": "field",
+      "tags": [
+        "黄金期货"
+      ],
+      "definition": "黄金期货合约、保证金、交割与行情背景，区分具体合约和主连及换月。"
+    },
+    {
+      "slug": "gold-etf",
+      "name": "黄金 ETF",
+      "group": "field",
+      "tags": [
+        "黄金ETF"
+      ],
+      "definition": "黄金 ETF 的产品与资金变化，分清份额净值、二级市场价格和标的金价。"
     }
   ]
 }

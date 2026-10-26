@@ -1,6 +1,149 @@
 {
-  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里新建、修改和暂停。字段说明见 docs/customize.md。",
+  "$comment": "MAFi 三行业候选信源。enabled=true 为本次快照解析验证通过的默认来源；全局自动采集仍须保持关闭，运营者确认白名单与模型预算后再开启。失败/动态页/无可靠发布日期的来源显式暂停。首次导入不覆盖已有配置，也不会删除旧信源；详见 docs/mafi-handoff.md。 八个原始 AI 补充源目前默认暂停；开启前需核对采集预算与精选标准，本轮页面精简不自动启用来源或模型。",
   "sources": [
+    {
+      "id": "web-nmpa-devices",
+      "name": "国家药监局 · 医疗器械公告",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.nmpa.gov.cn/ylqx/ylqxggtg/index.html",
+        "parseMode": "html",
+        "itemSelector": "li:has(> a[href$=\".html\"]):has(> span)",
+        "linkSelector": "a",
+        "titleSelector": "a",
+        "publishedAtSelector": "span",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.nmpa.gov.cn/ylqx/",
+          "https://www.nmpa.gov.cn/xxgk/ggtg/ylqxggtg/"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "nmpa",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "医药",
+        "医疗器械",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-nmpa-trends",
+      "name": "国家药监局 · 医疗器械监管动态",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.nmpa.gov.cn/ylqx/ylqxjgdt/index.html",
+        "parseMode": "html",
+        "itemSelector": "li:has(> a[href$=\".html\"]):has(> span)",
+        "linkSelector": "a",
+        "titleSelector": "a",
+        "publishedAtSelector": "span",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.nmpa.gov.cn/ylqx/",
+          "https://www.nmpa.gov.cn/yaowen/",
+          "https://www.nmpa.gov.cn/zhuanti/cxylqx/"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "nmpa",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "医药",
+        "医疗器械",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-nhsa-news",
+      "name": "国家医保局 · 政策与工作动态",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.nhsa.gov.cn/",
+        "parseMode": "html",
+        "itemSelector": "li:has(> a[href*=\"/art/\"])",
+        "linkSelector": "a[href*=\"/art/\"]",
+        "titleSelector": "a[href*=\"/art/\"]",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.nhsa.gov.cn/art/"
+        ],
+        "publishedAtRegex": "href=[\"'](?:https?:)?(?://www\\.nhsa\\.gov\\.cn)?/art/(\\d{4}/\\d{1,2}/\\d{1,2})/",
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        },
+        "sortByPublishedAt": true
+      },
+      "tier": "T1",
+      "owner_entity_id": "nhsa",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "医药",
+        "集采",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-smpaa-notices",
+      "name": "上海阳光医药采购网 · 药事所公告",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.smpaa.cn/xxgk/gggs/index.shtml",
+        "parseMode": "html",
+        "itemSelector": ".list_list_con li",
+        "linkSelector": "a",
+        "titleSelector": "a",
+        "publishedAtSelector": "span",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.smpaa.cn/xxgk/gggs/"
+        ],
+        "detail": {
+          "maxFetches": 8,
+          "titleSelector": "h1",
+          "titleAuthoritative": true
+        },
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        },
+        "sortByPublishedAt": true
+      },
+      "tier": "T1",
+      "owner_entity_id": "smpaa",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "医药",
+        "医疗器械",
+        "集采",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
     {
       "id": "rss-openai-news",
       "name": "OpenAI News",
@@ -8,7 +151,8 @@
       "config": {
         "feedUrl": "https://openai.com/news/rss.xml",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
         }
       },
       "tier": "T1",
@@ -16,10 +160,13 @@
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
+        "AI",
+        "模型",
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": true
     },
     {
       "id": "rss-google-deepmind",
@@ -28,7 +175,8 @@
       "config": {
         "feedUrl": "https://deepmind.google/blog/rss.xml",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
         }
       },
       "tier": "T1",
@@ -36,40 +184,467 @@
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
+        "AI",
+        "模型",
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": true
     },
     {
-      "id": "rss-google-research",
-      "name": "Google Research",
-      "kind": "rss",
+      "id": "web-anthropic-news",
+      "name": "Anthropic News",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://research.google/blog/rss/",
+        "url": "https://www.anthropic.com/news",
+        "parseMode": "html",
+        "itemSelector": "article:has(> header time), div[data-peek=\"true\"]:has(time)",
+        "linkSelector": "a:has(h2), a:has(h3)",
+        "titleSelector": "h2, h3",
+        "publishedAtSelector": "time",
+        "publishedAtUtcOffset": "+00:00",
         "_aihot": {
-          "initialBackfillLimit": 8
-        }
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        },
+        "allowUrlPrefixes": [
+          "https://www.anthropic.com/"
+        ],
+        "sortByPublishedAt": true
       },
       "tier": "T1",
-      "owner_entity_id": "google",
+      "owner_entity_id": "anthropic",
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方",
-        "研究"
+        "AI",
+        "模型",
+        "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-deepseek-updates",
+      "name": "DeepSeek API · 官方更新",
+      "kind": "web_list",
+      "config": {
+        "url": "https://api-docs.deepseek.com/updates",
+        "parseMode": "docusaurus_changelog",
+        "publishedAtUtcOffset": "+08:00",
+        "preserveUrlFragment": true,
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "deepseek",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "AI",
+        "模型",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "rss-github-ai",
+      "name": "GitHub Blog · AI 与机器学习",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://github.blog/ai-and-ml/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "github",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "AI",
+        "GitHub",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "rss-github-open-source",
+      "name": "GitHub Blog · 开源项目",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://github.blog/open-source/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "github",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "AI",
+        "GitHub",
+        "开源"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": false
+    },
+    {
+      "id": "json-vllm-releases",
+      "name": "GitHub · vLLM 正式版本",
+      "kind": "json_list",
+      "config": {
+        "url": "https://api.github.com/repos/vllm-project/vllm/releases?per_page=10",
+        "mode": "json_api",
+        "headers": {
+          "X-GitHub-Api-Version": "2022-11-28"
+        },
+        "titlePaths": [
+          "name",
+          "tag_name"
+        ],
+        "urlTemplate": "{raw:html_url}",
+        "summaryPaths": [
+          "body"
+        ],
+        "publishedAtPath": "published_at",
+        "externalIdPath": "id",
+        "requireBoolean": {
+          "path": "prerelease",
+          "equals": false
+        },
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "vllm",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "AI",
+        "GitHub",
+        "开源"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "json-ollama-releases",
+      "name": "GitHub · Ollama 正式版本",
+      "kind": "json_list",
+      "config": {
+        "url": "https://api.github.com/repos/ollama/ollama/releases?per_page=10",
+        "mode": "json_api",
+        "headers": {
+          "X-GitHub-Api-Version": "2022-11-28"
+        },
+        "titlePaths": [
+          "name",
+          "tag_name"
+        ],
+        "urlTemplate": "{raw:html_url}",
+        "summaryPaths": [
+          "body"
+        ],
+        "publishedAtPath": "published_at",
+        "externalIdPath": "id",
+        "requireBoolean": {
+          "path": "prerelease",
+          "equals": false
+        },
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "ollama",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "AI",
+        "GitHub",
+        "开源"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-nbs-releases",
+      "name": "国家统计局 · 数据发布",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.stats.gov.cn/sj/zxfb/",
+        "parseMode": "html",
+        "itemSelector": "li:has(> a.pc_1600):has(> span)",
+        "linkSelector": "a.pc_1600",
+        "titleSelector": "a.pc_1600",
+        "publishedAtSelector": "span",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.stats.gov.cn/sj/zxfb/"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "nbs",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "金融",
+        "宏观指标",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-pboc-news",
+      "name": "中国人民银行 · 新闻与政策",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.pbc.gov.cn/goutongjiaoliu/113456/113469/index.html",
+        "parseMode": "html",
+        "itemSelector": "td:has(> font.newslist_style):has(> span.hui12)",
+        "linkSelector": "font.newslist_style a",
+        "titleSelector": "font.newslist_style a",
+        "publishedAtSelector": "span.hui12",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.pbc.gov.cn/goutongjiaoliu/113456/113469/"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "pboc",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "金融",
+        "货币政策",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-safe-news",
+      "name": "国家外汇管理局 · 外汇新闻",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.safe.gov.cn/safe/whxw/index.html",
+        "parseMode": "html",
+        "itemSelector": "li:has(> dt a):has(> dd)",
+        "linkSelector": "dt a",
+        "titleSelector": "dt a",
+        "publishedAtSelector": "dd",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.safe.gov.cn/safe/20"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "safe",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "金融",
+        "外汇",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-csrc-market",
+      "name": "中国证监会 · 证券市场快报",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.csrc.gov.cn/csrc/c100119/common_list.shtml",
+        "parseMode": "html",
+        "itemSelector": "li:has(> a[href*=\"/csrc/c100119/\"]):has(.date)",
+        "linkSelector": "a",
+        "titleSelector": "a",
+        "publishedAtSelector": ".date",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.csrc.gov.cn/csrc/c100119/"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "csrc",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "金融",
+        "股票市场",
+        "周度统计",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-shfe-notices",
+      "name": "上海期货交易所 · 公告通知",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.shfe.com.cn/publicnotice/notice/",
+        "parseMode": "html",
+        "itemSelector": ".table_item_info:has(.info_item_title a)",
+        "linkSelector": ".info_item_title a",
+        "titleSelector": ".info_item_title a",
+        "publishedAtSelector": ".info_item_date",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.shfe.com.cn/publicnotice/notice/"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "shfe",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "金融",
+        "期货",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "rss-fed-press",
+      "name": "美联储 · 官方新闻稿",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.federalreserve.gov/feeds/press_all.xml",
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "fed",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "金融",
+        "海外宏观",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "rss-cnbc-top",
+      "name": "CNBC · 国际财经与市场",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "金融",
+        "海外市场",
+        "媒体"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "web-stcn-news",
+      "name": "证券时报 · 财经要闻",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.stcn.com/article/list/yw.html",
+        "parseMode": "html",
+        "itemSelector": "li:has(.content .tt a[href*=\"/article/detail/\"])",
+        "linkSelector": ".tt a",
+        "titleSelector": ".tt a",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.stcn.com/article/detail/"
+        ],
+        "detail": {
+          "maxFetches": 8,
+          "publishedAtSelector": ".detail-info > span:nth-of-type(3)",
+          "publishedAtUtcOffset": "+08:00"
+        },
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "金融",
+        "国内市场",
+        "媒体"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
     },
     {
       "id": "rss-hugging-face",
-      "name": "Hugging Face Blog",
+      "name": "Hugging Face Blog（本地连接待复核）",
       "kind": "rss",
       "config": {
         "feedUrl": "https://huggingface.co/blog/feed.xml",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
         }
       },
       "tier": "T1",
@@ -77,294 +652,201 @@
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方",
-        "开源"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-microsoft-research",
-      "name": "Microsoft Research",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://www.microsoft.com/en-us/research/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": "microsoft",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "研究"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-nvidia-blog",
-      "name": "NVIDIA Blog",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://blogs.nvidia.com/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": "nvidia",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
+        "AI",
+        "开源",
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": true
     },
     {
-      "id": "rss-aws-ml",
-      "name": "AWS Machine Learning Blog",
+      "id": "rss-bls-news",
+      "name": "美国劳工统计局（访问受限待复核）",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://aws.amazon.com/blogs/machine-learning/feed/",
+        "feedUrl": "https://www.bls.gov/feed/news_release/rss_latest.rss",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
         }
       },
       "tier": "T1",
-      "owner_entity_id": null,
+      "owner_entity_id": "bls",
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方",
-        "教程"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-github-ai",
-      "name": "GitHub Blog · AI & ML",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://github.blog/ai-and-ml/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
+        "金融",
+        "海外宏观",
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
-      "id": "rss-mistral",
-      "name": "Mistral AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://mistral.ai/news/rss",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
+      "id": "external-cmde",
+      "name": "器审中心（待公开采集入口）",
+      "kind": "external",
+      "config": {},
       "tier": "T1",
-      "owner_entity_id": null,
+      "owner_entity_id": "cmde",
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
+        "医药",
+        "医疗器械",
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
-      "id": "rss-bair",
-      "name": "Berkeley AI Research",
-      "kind": "rss",
+      "id": "external-qwen",
+      "name": "Qwen 官方动态（待公开采集入口）",
+      "kind": "external",
+      "config": {},
+      "tier": "T1",
+      "owner_entity_id": "qwen",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "AI",
+        "模型",
+        "官方"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": false
+    },
+    {
+      "id": "web-github-trending",
+      "name": "GitHub Trending（无发布日期，暂不入榜）",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://bair.berkeley.edu/blog/feed.xml",
+        "url": "https://github.com/trending?since=daily",
+        "parseMode": "html",
+        "itemSelector": "article.Box-row",
+        "linkSelector": "h2 a",
+        "titleSelector": "h2 a",
+        "publishedAtUtcOffset": "+08:00",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "hot_signal",
+      "interval_minutes": 120,
+      "tags": [
+        "AI",
+        "GitHub",
+        "热度观察"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": false
+    },
+    {
+      "id": "web-nhsa-col-187",
+      "name": "国家医保局 · 国家组织集采（内嵌列表待适配）",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.nhsa.gov.cn/col/col187/index.html",
+        "parseMode": "html",
+        "itemSelector": "li:has(a[href*=\"/art/\"])",
+        "linkSelector": "a",
+        "titleSelector": "a",
+        "publishedAtSelector": "span",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.nhsa.gov.cn/art/"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
         }
       },
       "tier": "T1",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 180,
-      "tags": [
-        "研究"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-the-verge-ai",
-      "name": "The Verge · AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-techcrunch-ai",
-      "name": "TechCrunch · AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://techcrunch.com/category/artificial-intelligence/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-ars-technica-ai",
-      "name": "Ars Technica · AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://arstechnica.com/ai/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-mit-tech-review-ai",
-      "name": "MIT Technology Review · AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "owner_entity_id": null,
+      "owner_entity_id": "nhsa",
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "媒体"
+        "医药",
+        "集采",
+        "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
-      "id": "rss-the-decoder",
-      "name": "The Decoder",
-      "kind": "rss",
+      "id": "web-nhsa-col-185",
+      "name": "国家医保局 · 省际联盟采购（内嵌列表待适配）",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://the-decoder.com/feed/",
+        "url": "https://www.nhsa.gov.cn/col/col185/index.html",
+        "parseMode": "html",
+        "itemSelector": "li:has(a[href*=\"/art/\"])",
+        "linkSelector": "a",
+        "titleSelector": "a",
+        "publishedAtSelector": "span",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.nhsa.gov.cn/art/"
+        ],
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
         }
       },
-      "tier": "T2",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-simon-willison",
-      "name": "Simon Willison",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://simonwillison.net/atom/everything/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "owner_entity_id": null,
+      "tier": "T1",
+      "owner_entity_id": "nhsa",
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "个人"
+        "医药",
+        "集采",
+        "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
-      "id": "rss-import-ai",
-      "name": "Import AI",
-      "kind": "rss",
+      "id": "web-nhsa-col-186",
+      "name": "国家医保局 · 省级集中采购（内嵌列表待适配）",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://importai.substack.com/feed",
+        "url": "https://www.nhsa.gov.cn/col/col186/index.html",
+        "parseMode": "html",
+        "itemSelector": "li:has(a[href*=\"/art/\"])",
+        "linkSelector": "a",
+        "titleSelector": "a",
+        "publishedAtSelector": "span",
+        "publishedAtUtcOffset": "+08:00",
+        "allowUrlPrefixes": [
+          "https://www.nhsa.gov.cn/art/"
+        ],
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 8,
+          "initialBackfillMonths": 12
         }
       },
-      "tier": "T2",
-      "owner_entity_id": null,
+      "tier": "T1",
+      "owner_entity_id": "nhsa",
       "participation_mode": "editorial",
-      "interval_minutes": 180,
+      "interval_minutes": 120,
       "tags": [
-        "个人",
-        "周刊"
+        "医药",
+        "集采",
+        "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-latent-space",
-      "name": "Latent Space",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://www.latent.space/feed",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 180,
-      "tags": [
-        "个人"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     }
   ]
 }

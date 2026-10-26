@@ -15,6 +15,7 @@ import { PillTabs } from "../components/ui/Tabs";
 import { ArticleLayout, RailSection, useContainedScroll } from "../components/ui/Page";
 import { Menu, MenuItem } from "../components/ui/Menu";
 import { StarButton } from "../features/feed/parts";
+import { ModuleItemActions } from "../features/item/ModuleItemActions";
 import { GroupButton, GroupSources } from "../features/feed/ReadingGroup";
 import { StoryFollowups } from "../features/item/StoryFollowups";
 import { MediaGallery } from "../features/item/MediaGallery";
@@ -34,8 +35,9 @@ export { pageHeaders as headers } from "../lib/api.server";
 const PosterSheet = lazy(() => import("../features/item/PosterSheet"));
 
 export async function loader({ params, request }: Route.LoaderArgs) {
-  const item = await loadOr404<SiteItemDetail>(`/api/site/items/${encodeURIComponent(params.id)}`, { signal: request.signal });
-  return cachedPage(600, { item });
+  const upstream = new Headers();
+  const item = await loadOr404<SiteItemDetail>(`/api/site/items/${encodeURIComponent(params.id)}`, { signal: request.signal, request, responseHeaders: upstream });
+  return cachedPage(600, { item }, upstream);
 }
 
 type Preview = { item: null; preview: FeedItemSummary; detail: Promise<{ item: SiteItemDetail }> };
@@ -374,6 +376,7 @@ function ItemView({ item }: { item: SiteItemDetail }) {
       >
         {originalLabel} <IconExternal size={13} />
       </a>
+      <ModuleItemActions itemId={item.id} myVote={item.myVote} placement="article" />
       <StarButton item={item} size={32} />
       {moreMenu}
     </div>

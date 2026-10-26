@@ -1,4 +1,5 @@
-import { useLoaderData } from "react-router";
+import { useEffect } from "react";
+import { useLoaderData, useRevalidator } from "react-router";
 import { IntentLink } from "../components/ui/IntentLink";
 import type { HotEntryView, HotResponse } from "@aihot/contracts/site";
 import { subjectAfter, withSubject } from "@aihot/site";
@@ -22,7 +23,8 @@ export { pageHeaders as headers } from "../lib/api.server";
 export const { clientLoader, shouldRevalidate } = pageReuse<typeof loader>();
 
 export async function loader({ request }: { request: Request }) {
-  return cachedPage(120, { hot: await loadOr404<HotResponse>("/api/site/hot", { signal: request.signal }) });
+  const upstream = new Headers();
+  return cachedPage(120, { hot: await loadOr404<HotResponse>("/api/site/hot", { signal: request.signal, request, responseHeaders: upstream }) }, upstream);
 }
 
 export function meta() {
@@ -238,6 +240,12 @@ function showMethod() {
 
 export default function HotPage() {
   const { hot } = useLoaderData<typeof loader>();
+  const revalidator = useRevalidator();
+  useEffect(() => {
+    const onPref = () => { void revalidator.revalidate(); };
+    window.addEventListener("mafi:preferences-changed", onPref);
+    return () => window.removeEventListener("mafi:preferences-changed", onPref);
+  }, [revalidator]);
   const [lead, ...rest] = hot.entries;
   const runners = rest.slice(0, 2);
   const others = rest.slice(2);

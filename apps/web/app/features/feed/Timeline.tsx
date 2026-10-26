@@ -16,6 +16,7 @@ import { byBeijingDay, weekdayShort } from "../../lib/format";
 import { isHydrated } from "../../lib/hydration";
 import { markRead, useReadSet } from "../../lib/local-state";
 import { filterParams, listPath } from "../../lib/seo";
+import { fetchTimelineHeadState } from "./preference-refresh";
 import { isReload, readSnapshot, restoreAnchor, saveSnapshot, useSaveOnLeave } from "../../lib/restore";
 
 const AUTO_BATCHES = 3;
@@ -214,6 +215,36 @@ export function Timeline({ initial, filters }: { initial: TimelineResponse; filt
     }
   }, [navigation.state, navigation.location, historyKey]);
   useSaveOnLeave(historyKey, () => stateRef.current);
+
+  // Preference vote: drop any in-flight page cursor and refetch the head so order + myVote match the private API.
+  useEffect(() => {
+    const onPref = () => {
+      pageRequest.current?.abort();
+      pageRequest.current = null;
+      const controller = new AbortController();
+      pageRequest.current = controller;
+      const key = listPath("/api/site/timeline", filterParams(filters));
+      void (async () => {
+        try {
+          const next = await fetchTimelineHeadState(key, {
+            signal: controller.signal,
+            unreadOnly: stateRef.current.unreadOnly,
+          });
+          if (lastFilterKey.current !== key || controller.signal.aborted) return;
+          setLoadingMore(false);
+          setLoadError(false);
+          setFreshKeys(new Set());
+          setState(next);
+        } catch {
+          /* aborted or failed head refresh — leave current list */
+        } finally {
+          if (pageRequest.current === controller) pageRequest.current = null;
+        }
+      })();
+    };
+    window.addEventListener("mafi:preferences-changed", onPref);
+    return () => window.removeEventListener("mafi:preferences-changed", onPref);
+  }, [filters]);
 
   const loadMore = useCallback(async () => {
     const s = stateRef.current;

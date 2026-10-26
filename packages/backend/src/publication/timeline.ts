@@ -10,7 +10,7 @@ import {
   ITEM_COLUMNS, ITEM_FROM, categoryCondition, channelCondition, tagCondition, toFeedItemSummary,
   type ItemRow,
 } from "./items.ts";
-import { evidenceCondition, foldableSelectionCondition, listedCondition, ownFactEvidenceCondition, selectedCondition } from "./scope.ts";
+import { evidenceCondition, foldableSelectionCondition, listedCondition, listingFreshCondition, ownFactEvidenceCondition, selectedCondition } from "./scope.ts";
 
 export interface TimelineQuery extends TimelineFilters {
   cursor?: string | null;
@@ -58,7 +58,7 @@ async function queryGroupedAnchors(q: TimelineQuery, now: Date) {
         SELECT p.sort_at, CASE WHEN p.fact_id IS NOT NULL AND ${ownFactEvidenceCondition()} AND ${foldableSelectionCondition()}
           THEN 'f' || p.fact_id::text ELSE 'a' || p.article_id END AS gk
         FROM publications p
-        WHERE ${selectedCondition(now)} ${filterSql(q)}
+        WHERE ${selectedCondition(now)} AND ${listingFreshCondition(now)} ${filterSql(q)}
       )
       SELECT gk, min(sort_at) AS anchor_at FROM base GROUP BY gk ORDER BY anchor_at DESC, gk COLLATE "C" DESC`
   ).map((r) => ({ gk: r.gk, anchor: r.anchor_at.getTime() }));
@@ -161,4 +161,66 @@ export async function loadTimeline(q: TimelineQuery): Promise<Omit<TimelineRespo
   const last = page[page.length - 1];
   const nextCursor = hasMore && last ? encodeCursor("tl2", { a: last.anchor_at.getTime(), g: last.gk, b: bind }) : null;
   return { filters: { channel: q.channel, category: q.category, tag: q.tag }, cards, nextCursor, dayCounts };
+}
+
+/** Internal window evidence for device preference projection (same cursor window only). */
+export interface TimelineReaderCandidate {
+  itemId: string;
+  sourceId: string;
+  publicBaseScore: number;
+  publicTimeMs: number;
+  groupKey: string;
+}
+
+export interface TimelineReaderWindow {
+  data: Omit<TimelineResponse, "hot">;
+  candidates: TimelineReaderCandidate[];
+}
+
+/**
+ * Public timeline page plus per-card (and group member) candidates.
+ * groupKey is the fact public id when folded, else the item id. Votes never change eligibility.
+ */
+export async function loadTimelineReaderWindow(q: TimelineQuery): Promise<TimelineReaderWindow> {
+  const data = await loadTimeline(q);
+  if (!data.cards.length) return { data, candidates: [] };
+
+  const memberIds = new Set<string>();
+  const cardMeta = new Map<string, { groupKey: string; publicBaseScore: number; publicTimeMs: number }>();
+  for (const card of data.cards) {
+    const groupKey = card.group?.factId ?? card.item.id;
+    const publicTimeMs = Date.parse(card.anchorAt);
+    const publicBaseScore = publicTimeMs;
+    cardMeta.set(card.item.id, { groupKey, publicBaseScore, publicTimeMs });
+    if (card.group?.memberIds?.length) {
+      for (const id of card.group.memberIds) {
+        memberIds.add(id);
+        if (!cardMeta.has(id)) cardMeta.set(id, { groupKey, publicBaseScore, publicTimeMs });
+      }
+    } else {
+      memberIds.add(card.item.id);
+    }
+  }
+
+  const ids = [...memberIds];
+  const rows = ids.length
+    ? await sql<{ article_id: string; source_id: string }[]>`
+        SELECT p.article_id, p.source_id FROM publications p WHERE p.article_id IN ${sql(ids)}`
+    : [];
+  const sourceById = new Map(rows.map((r) => [r.article_id, r.source_id]));
+
+  const candidates: TimelineReaderCandidate[] = [];
+  for (const id of ids) {
+    const meta = cardMeta.get(id);
+    const sourceId = sourceById.get(id);
+    if (!meta || !sourceId) continue;
+    candidates.push({
+      itemId: id,
+      sourceId,
+      publicBaseScore: meta.publicBaseScore,
+      publicTimeMs: meta.publicTimeMs,
+      groupKey: meta.groupKey,
+    });
+  }
+  return { data, candidates };
 }

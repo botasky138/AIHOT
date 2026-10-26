@@ -1,24 +1,52 @@
 // First-party site API (/api/site/*). Not public, not versioned, never called /api/v2.
-// Reads through the same public read layer as v1; no cookies are read or set.
+// Public path remains cookie-free; personalized path reads mafi_device only.
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { isCategoryKey, isChannelKey, type CategoryKey, type ChannelKey } from "@aihot/contracts/taxonomy";
-import type { ReportIndexResponse, ReportLatestPage, ReportNavigationResponse, SearchSuggestions, SiteContact } from "@aihot/contracts/site";
+import type { HotResponse, PoolResponse, ReportIndexResponse, ReportLatestPage, ReportNavigationResponse, SearchSuggestions, SiteContact, SiteItemDetail, TimelineResponse } from "@aihot/contracts/site";
 import { InvalidCursorError } from "@aihot/backend/lib/cursor";
+import { serverModules } from "@aihot/backend/modules";
 import { exportMarkdown, loadItemDetail } from "@aihot/backend/publication/detail";
-import { loadPool, SearchBusyError } from "@aihot/backend/publication/pool";
-import { loadTimeline } from "@aihot/backend/publication/timeline";
+import { loadPool, loadPoolReaderWindow, SearchBusyError } from "@aihot/backend/publication/pool";
+import { loadTimeline, loadTimelineReaderWindow } from "@aihot/backend/publication/timeline";
 import { loadStoryFollowups } from "@aihot/backend/publication/followups";
 import { loadGroupReports } from "@aihot/backend/publication/groups";
 import { hotSearchLinks, loadHotStrip } from "@aihot/backend/publication/hot";
 import { loadChangelog, siteMeta } from "@aihot/backend/site/meta";
 import { loadContact, loadMakerAvatar } from "@aihot/backend/site/contact";
 import { loadSiteStats } from "@aihot/backend/site/stats";
+import { loadSiteStatus } from "@aihot/backend/site/status";
 import { itemAvailability } from "@aihot/backend/publication/availability";
 import { listTopicSummaries, loadTopicPage, topicBrowseLinks } from "@aihot/backend/publication/topics";
 import { registerFeedback } from "./feedback.ts";
-import { loadHot, loadStoryDetail, resolveStory } from "@aihot/backend/publication/stories";
-import { listReports, loadReport, reportNavigation, loadReportNavigation, loadReportMonth, type ReportKind } from "@aihot/backend/publication/reports";
+import { loadHot, loadHotReaderWindow, loadStoryDetail, resolveStory } from "@aihot/backend/publication/stories";
+import { listReports, listReportsTodayOnward, loadReport, reportNavigation, loadReportNavigation, loadReportMonth, type ReportKind } from "@aihot/backend/publication/reports";
 import { looseQuery, QueryError, sendJsonWithEtag, sendProblem } from "../http/respond.ts";
+
+/** Preference helpers live on the installed mafi-preferences ServerModule (cast by name; no hard import). */
+interface PreferenceSiteHelpers {
+  resolveDevice(cookieHeader: string | undefined): Promise<{ deviceId: string } | null>;
+  personalizePool(data: PoolResponse, candidates: readonly PreferenceCandidate[], deviceId: string): Promise<PoolResponse>;
+  personalizeTimeline(data: TimelineResponse, candidates: readonly PreferenceCandidate[], deviceId: string): Promise<TimelineResponse>;
+  personalizeHot(data: HotResponse, candidates: readonly PreferenceCandidate[], deviceId: string): Promise<HotResponse>;
+  personalizeItem(item: SiteItemDetail, deviceId: string): Promise<SiteItemDetail>;
+}
+
+interface PreferenceCandidate {
+  itemId: string;
+  sourceId: string;
+  publicBaseScore: number;
+  publicTimeMs: number;
+  groupKey?: string;
+}
+
+function preferenceHelpers(): PreferenceSiteHelpers | null {
+  const mod = serverModules().find((m) => m.name === "mafi-preferences");
+  return mod ? (mod as unknown as PreferenceSiteHelpers) : null;
+}
+
+function sendPrivateJson(reply: FastifyReply, body: unknown) {
+  return reply.header("Cache-Control", "private, no-store").header("X-Accel-Expires", "0").send(body);
+}
 
 type Handler = (req: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
 
@@ -57,6 +85,11 @@ export function parseFilters(q: Record<string, string>): FilterParams {
 }
 
 export function registerSite(app: FastifyInstance) {
+  app.get("/api/site/status", siteHandler(async (_req, reply) => {
+    // Live ops pill: never cache; keep the handler cheap (no LLM).
+    return reply.header("Cache-Control", "no-store").send(await loadSiteStatus());
+  }));
+
   app.get("/api/site/meta", siteHandler(async (req, reply) => {
     return sendJsonWithEtag(req, reply, siteMeta(), { etagPrefix: "meta", cacheControl: "public, max-age=60, s-maxage=60" });
   }));
@@ -66,6 +99,16 @@ export function registerSite(app: FastifyInstance) {
     const filters = parseFilters(q);
     const limit = Math.min(Math.max(Number(q.limit) || 20, 1), 40);
     const unfiltered = filters.channel === "all" && !filters.category && !filters.tag && !q.cursor;
+    const prefs = preferenceHelpers();
+    const device = prefs ? await prefs.resolveDevice(req.headers.cookie) : null;
+    if (device && prefs) {
+      const [{ data, candidates }, hot] = await Promise.all([
+        loadTimelineReaderWindow({ ...filters, cursor: q.cursor || null, limit }),
+        unfiltered ? loadHotStrip() : null,
+      ]);
+      const body = await prefs.personalizeTimeline({ ...data, hot }, candidates, device.deviceId);
+      return sendPrivateJson(reply, body);
+    }
     const [data, hot] = await Promise.all([
       loadTimeline({ ...filters, cursor: q.cursor || null, limit }),
       unfiltered ? loadHotStrip() : null,
@@ -81,6 +124,12 @@ export function registerSite(app: FastifyInstance) {
     const page = Math.min(Math.max(Number(q.page) || 1, 1), 50);
     const search = q.q?.trim() ? q.q.trim().slice(0, 200) : null;
     const tab = q.tab === "relevance" ? "relevance" : "time";
+    const prefs = preferenceHelpers();
+    const device = prefs ? await prefs.resolveDevice(req.headers.cookie) : null;
+    if (device && prefs) {
+      const { data, candidates } = await loadPoolReaderWindow({ ...filters, q: search, tab, page });
+      return sendPrivateJson(reply, await prefs.personalizePool(data, candidates, device.deviceId));
+    }
     return sendJsonWithEtag(req, reply, await loadPool({ ...filters, q: search, tab, page }), { etagPrefix: "pool", cacheControl: "public, max-age=60, s-maxage=60" });
   }));
 
@@ -89,6 +138,11 @@ export function registerSite(app: FastifyInstance) {
     if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id)) return sendProblem(req, reply, { status: 404, code: "not_found", detail: "item not found" });
     const result = await loadItemDetail(id);
     if (result.kind === "not_found") return sendProblem(req, reply, { status: 404, code: "not_found", detail: "item not found", cacheControl: "public, max-age=60" });
+    const prefs = preferenceHelpers();
+    const device = prefs ? await prefs.resolveDevice(req.headers.cookie) : null;
+    if (device && prefs) {
+      return sendPrivateJson(reply, await prefs.personalizeItem(result.item, device.deviceId));
+    }
     return sendJsonWithEtag(req, reply, result.item, { etagPrefix: "item", cacheControl: "public, max-age=60, s-maxage=60" });
   }));
 
@@ -97,6 +151,11 @@ export function registerSite(app: FastifyInstance) {
     if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id)) return sendProblem(req, reply, { status: 404, code: "not_found", detail: "item not found" });
     const result = await loadItemDetail(id, "original");
     if (result.kind === "not_found") return sendProblem(req, reply, { status: 404, code: "not_found", detail: "item not found", cacheControl: "public, max-age=60" });
+    const prefs = preferenceHelpers();
+    const device = prefs ? await prefs.resolveDevice(req.headers.cookie) : null;
+    if (device && prefs) {
+      return sendPrivateJson(reply, await prefs.personalizeItem(result.item, device.deviceId));
+    }
     return sendJsonWithEtag(req, reply, result.item, { etagPrefix: "item-original", cacheControl: "public, max-age=60, s-maxage=60" });
   }));
 
@@ -151,6 +210,12 @@ export function registerSite(app: FastifyInstance) {
   registerFeedback(app);
 
   app.get("/api/site/hot", siteHandler(async (req, reply) => {
+    const prefs = preferenceHelpers();
+    const device = prefs ? await prefs.resolveDevice(req.headers.cookie) : null;
+    if (device && prefs) {
+      const { data, candidates } = await loadHotReaderWindow();
+      return sendPrivateJson(reply, await prefs.personalizeHot(data, candidates, device.deviceId));
+    }
     const data = await loadHot();
     return sendJsonWithEtag(req, reply, data, { etagPrefix: "hot", cacheControl: "public, max-age=30, s-maxage=30" });
   }));
@@ -178,7 +243,8 @@ export function registerSite(app: FastifyInstance) {
   app.get("/api/site/reports/:kind/latest-page", siteHandler(async (req, reply) => {
     const kind = (req.params as { kind: string }).kind;
     if (!["daily", "weekly", "monthly"].includes(kind)) return sendProblem(req, reply, { status: 404, code: "not_found", detail: "unknown report kind" });
-    const index = await listReports(kind as ReportKind);
+    // /daily (and period latest): yesterday-and-later issues; archive routes still use listReports.
+    const index = await listReportsTodayOnward(kind as ReportKind);
     const report = index[0] ? await loadReport(kind as ReportKind, index[0].key) : null;
     const body: ReportLatestPage = { index: reportNavigation(kind as ReportKind, index, report?.key ?? ""), report };
     return sendJsonWithEtag(req, reply, body, { etagPrefix: "report-latest", cacheControl: "public, max-age=60, s-maxage=60" });

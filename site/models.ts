@@ -7,6 +7,12 @@ export type { ModelPreset } from "@aihot/contracts/site-config";
 
 /** 具名的模型示例（每个要配自己的密钥）。用不上可以删掉。 */
 export const PRESETS: Record<string, ModelPreset> = {
+  // Share the default model's request budget. MiniMax's current API does not document response_format;
+  // the prompt requests JSON and the existing schema parser still rejects unusable output.
+  "minimax-m3": {
+    service: "llm", model: "MiniMax-M3", baseUrlEnv: "MINIMAX_BASE_URL", apiKeyEnv: "MINIMAX_API_KEY",
+    extra: { thinking: { type: "disabled" }, reasoning_split: true }, jsonMode: false,
+  },
   // GLM 5.3 Flash always reasons; the lowest effort keeps short structured tasks fast.
   "glm-5.3-flash": {
     service: "zhipu", model: "glm-5.3-flash", baseUrlEnv: "ZHIPU_BASE_URL", apiKeyEnv: "ZHIPU_API_KEY",

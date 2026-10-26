@@ -20,7 +20,7 @@ export interface OgCard {
   meta?: string | null;
   /** Small emphasised figure on the right (e.g. an item score). */
   badge?: { value: string; label: string } | null;
-  accent?: "teal" | "hot" | "amber";
+  accent?: "gold" | "teal" | "hot" | "amber";
 }
 
 let fontsPromise: Promise<Array<{ name: string; data: Buffer; weight: 400 | 700; style: "normal" }>> | null = null;
@@ -78,7 +78,7 @@ export function nameMark(size: number, color: string, dot: string): Node {
   ]);
 }
 
-const ACCENTS = { teal: "#2ce2e8", hot: "#ff7a5f", amber: "#e2b454" } as const;
+const ACCENTS = { gold: "#c9a227", teal: "#c9a227", hot: "#ff7a5f", amber: "#e2b454" } as const;
 
 export function clamp(text: string, max: number) {
   const chars = [...text.replace(/\s+/g, " ").trim()];
@@ -86,7 +86,7 @@ export function clamp(text: string, max: number) {
 }
 
 async function tree(card: OgCard): Promise<Node> {
-  const accent = ACCENTS[card.accent ?? "teal"];
+  const accent = ACCENTS[card.accent ?? "gold"];
   const title = clamp(card.title, 64);
   const titleSize = [...title].length > 40 ? 50 : [...title].length > 24 ? 58 : 66;
   return h(
@@ -99,12 +99,12 @@ async function tree(card: OgCard): Promise<Node> {
       padding: "64px 72px",
       fontFamily: "Noto Sans SC",
       color: "#e6eded",
-      backgroundColor: "#0a1012",
+      backgroundColor: "#0a0a0c",
       backgroundImage: "radial-gradient(circle at 88% 8%, rgba(44,226,232,0.28), rgba(10,16,18,0) 46%), radial-gradient(circle at 0% 100%, rgba(23,107,117,0.35), rgba(10,16,18,0) 50%)",
     },
     [
       h("div", { display: "flex", alignItems: "center", justifyContent: "space-between" }, [
-        (await brandMark("wordmark-dark.svg", 40)) ?? nameMark(34, "#e6eded", "#2ce2e8"),
+        (await brandMark("wordmark-dark.svg", 40)) ?? nameMark(34, "#e6eded", "#c9a227"),
         h("div", { display: "flex", fontSize: 24, color: "#82939a" }, SITE_HOST),
       ]),
       h("div", { display: "flex", marginTop: 56, alignItems: "center" }, [

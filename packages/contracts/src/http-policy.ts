@@ -128,7 +128,7 @@ const ENGINE_API_PATHS: RegExp[] = [
   /^\/(llms\.txt|robots\.txt|sitemap\.xml|manifest\.webmanifest)$/,
   /^\/sitemaps\//,
   /^\/\.well-known\//,
-  /^\/(favicon\.ico|icon\.png|icon-192\.png|apple-icon\.png|logo\.svg)$/,
+  /^\/(favicon\.ico|favicon-v2\.ico|icon\.png|icon-v2\.png|icon-192\.png|icon-192-v2\.png|apple-icon\.png|apple-icon-v2\.png|logo\.svg)$/,
   ...(SITE.rootIcons.length ? [new RegExp(`^\\/(${SITE.rootIcons.map(literal).join("|")})$`)] : []),
   /^\/(og|contact)\//,
   ...(CONTACT_ALIASES.length ? [new RegExp(`^\\/(${CONTACT_ALIASES.map((a) => literal(a.file)).join("|")})$`)] : []),

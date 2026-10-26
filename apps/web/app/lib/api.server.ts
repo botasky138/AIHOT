@@ -47,9 +47,12 @@ export async function apiGet<T>(path: string, init?: { signal?: AbortSignal; hea
  * Maps API failures to route responses: real 404s, the permanent redirect of a merged page (`merged`
  * gives the page of the id it was merged into), the search-busy page, otherwise 503.
  */
-export async function loadOr404<T>(path: string, opts: { busyRedirect?: string; merged?: (id: string) => string; responseHeaders?: Headers; signal?: AbortSignal } = {}): Promise<T> {
+export async function loadOr404<T>(path: string, opts: { busyRedirect?: string; merged?: (id: string) => string; responseHeaders?: Headers; signal?: AbortSignal; request?: Request } = {}): Promise<T> {
   try {
-    return await apiGet<T>(path, { responseHeaders: opts.responseHeaders, signal: opts.signal });
+    const headers: Record<string, string> = {};
+    const cookie = opts.request?.headers.get("cookie");
+    if (cookie) headers.cookie = cookie;
+    return await apiGet<T>(path, { headers, responseHeaders: opts.responseHeaders, signal: opts.signal });
   } catch (error) {
     if (opts.signal?.aborted) throw error;
     if (error instanceof ApiError) {
@@ -79,10 +82,18 @@ export function edgeTtl(seconds: number): Record<string, string> {
 export function cachedPage<T extends object>(seconds: number, value: T, upstream?: Headers) {
   const now = Date.now();
   const second = Math.floor(now / 1000);
+  const upstreamCc = upstream?.get("Cache-Control") ?? "";
+  const isPrivate = /\bprivate\b/i.test(upstreamCc);
+  if (isPrivate) {
+    return data(
+      { ...value, expiresAt: 0 },
+      { headers: { "Cache-Control": "private, no-store", "X-Accel-Expires": "0" } },
+    );
+  }
   let deadline = second + seconds;
   const sourceDeadline = upstream?.get("X-Accel-Expires");
   if (sourceDeadline?.startsWith("@")) deadline = Math.min(deadline, Number(sourceDeadline.slice(1)));
-  if (sourceDeadline === "0" || /(?:no-cache|no-store)/i.test(upstream?.get("Cache-Control") ?? "")) deadline = second;
+  if (sourceDeadline === "0" || /(?:no-cache|no-store)/i.test(upstreamCc)) deadline = second;
   const left = (until: number) => Math.floor(until - now / 1000);
   const browserDeadline = Math.min(deadline, second + BROWSER_MAX_SECONDS);
   return data(

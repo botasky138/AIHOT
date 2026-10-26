@@ -1,6 +1,8 @@
 // Web list pages: HTML with selectors, Markdown through Jina Reader, and dated changelog sections.
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import * as cheerio from "cheerio";
-import { guardedFetch, languageHeaders, requireOk } from "../lib/http-fetch.ts";
+import { DEFAULT_UA, guardedFetch, HttpStatusError, languageHeaders, requireOk } from "../lib/http-fetch.ts";
 import { contentDocument } from "../lib/page-content.ts";
 import { fetchListing } from "./listing-fetch.ts";
 import { identityKeyForUrl, normalizeUrl } from "../lib/url.ts";
@@ -10,6 +12,33 @@ import { sanitizeBody } from "../content/sanitize.ts";
 import { JINA_PREFIX, jinaRead } from "../providers/jina.ts";
 import { articleUtcOffset, readPublicationDate, type PublicationDate } from "./dates.ts";
 import { FetchError, type Candidate, type SourceRow } from "./types.ts";
+
+const execFileAsync = promisify(execFile);
+
+/**
+ * Aliyun WAF on nmpa.gov.cn returns HTTP 412 to Node/undici (TLS fingerprint) while system curl
+ * still receives 200. Listing-only curl fallback keeps collect working without paid Jina.
+ * Body/detail paths are unchanged; NMPA sources have no config.detail and site_fulltext=false.
+ */
+async function curlListingHtml(url: string, timeoutMs: number): Promise<string> {
+  const host = new URL(url).hostname;
+  if (!/(^|\.)nmpa\.gov\.cn$/i.test(host)) throw new Error(`curl listing fallback not allowed for ${host}`);
+  const bin = process.platform === "win32" ? "curl.exe" : "curl";
+  const maxTime = Math.max(5, Math.ceil(timeoutMs / 1000));
+  const { stdout } = await execFileAsync(bin, [
+    "--noproxy", "*",
+    "--silent", "--show-error", "--fail-with-body",
+    "--location", "--max-redirs", "3",
+    "--connect-timeout", "10",
+    "--max-time", String(maxTime),
+    "-A", DEFAULT_UA,
+    "-H", "accept: text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
+    "-H", "accept-language: zh-CN,zh;q=0.9,en;q=0.8",
+    url,
+  ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024, timeout: timeoutMs + 5_000, windowsHide: true });
+  if (!stdout || stdout.length < 200) throw new Error("curl listing returned empty body");
+  return stdout;
+}
 
 
 /** A date rule names one element; unrelated tooltips must not hide its visible publication date. */
@@ -81,10 +110,20 @@ async function fetchListingText(source: SourceRow): Promise<{ text: string; viaJ
     const page = await jinaRead(target, { purpose: "source_listing", subject: `source:${source.id}`, cacheToleranceSeconds: source.config.cacheToleranceSeconds, format, perRead: true });
     return { text: page.markdown, viaJina: true, base: source.config.baseUrl ?? target };
   }
-  const res = requireOk(await fetchListing(url, { headers: { accept: "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8", ...languageHeaders(source.config.acceptLanguage) }, timeoutMs: 25_000 }));
-  const text = res.text();
-  contentDocument(text);
-  return { text, viaJina: false, base: source.config.baseUrl ?? res.url };
+  try {
+    const res = requireOk(await fetchListing(url, { headers: { accept: "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8", ...languageHeaders(source.config.acceptLanguage) }, timeoutMs: 25_000 }));
+    const text = res.text();
+    contentDocument(text);
+    return { text, viaJina: false, base: source.config.baseUrl ?? res.url };
+  } catch (error) {
+    // nmpa.gov.cn: undici often sees HTTP 412 (Aliyun WAF); system curl still gets the HTML list.
+    if (error instanceof HttpStatusError && error.status === 412 && /(^|\.)nmpa\.gov\.cn$/i.test(new URL(url).hostname)) {
+      const text = await curlListingHtml(url, 25_000);
+      contentDocument(text);
+      return { text, viaJina: false, base: source.config.baseUrl ?? url };
+    }
+    throw error;
+  }
 }
 
 /** A listing title that is no headline: a label that swallowed its summary, or a call to action. */

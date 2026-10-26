@@ -3,8 +3,29 @@
 // evidence, `fact_articles fa`); no other module spells visibility, the release time or the composite
 // rule in SQL, and grouping takes the composite rule from here too. What a publication holds is
 // derived once, at publish time, by publish.ts and rules.ts.
+import { beijingMidnight } from "@aihot/contracts/time";
 import { sql } from "../db.ts";
 import { independentSelectedSources } from './rules.ts';
+
+/**
+ * Listing floor for 精选/动态/热点/报告: fixed Beijing calendar day **2026-10-23 00:00+08**.
+ * Hide content before 2026-10-23; keep that day and later. Not a rolling yesterday filter.
+ * `now` kept for call-site compatibility; floor does not move with the clock.
+ */
+export function listingDayFloor(_now: Date = new Date()): Date {
+  return beijingMidnight(LISTING_FLOOR_BEIJING_DATE);
+}
+
+/** Beijing YYYY-MM-DD of the public listing floor (精选/动态/热点/报告). */
+export const LISTING_FLOOR_BEIJING_DATE = "2026-10-23" as const;
+
+/**
+ * Home /all /hot /daily freshness: items whose list time (sort_at) is on/after LISTING_FLOOR_BEIJING_DATE.
+ * Older rows stay in DB and on detail/archive routes; these four surfaces do not resurface them.
+ */
+export function listingFreshCondition(now: Date) {
+  return sql`p.sort_at >= ${listingDayFloor(now)}`;
+}
 
 /** These reports share their fact's display slot; independent sources keep their own selected card. */
 export function foldableSelectionCondition() {
@@ -82,3 +103,4 @@ export function evidenceCondition() {
 export function ownFactEvidenceCondition() {
   return sql`EXISTS (SELECT 1 FROM fact_articles fa WHERE fa.fact_id = p.fact_id AND fa.article_id = p.article_id AND ${evidenceCondition()})`;
 }
+

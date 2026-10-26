@@ -16,7 +16,7 @@ import { loadContact } from "@aihot/backend/site/contact";
 const PUBLIC = path.join(REPO_ROOT, "site/public");
 /** The site's brand files (site/brand/), and how long its icons are cached. */
 const BRAND = path.join(REPO_ROOT, "site/brand");
-const ICON_CACHE = "public, max-age=2592000, stale-while-revalidate=604800";
+const ICON_CACHE = "public, max-age=3600, must-revalidate";
 
 const TYPES: Record<string, string> = {
   ".json": "application/json; charset=UTF-8",
@@ -138,7 +138,7 @@ export function registerStatic(app: FastifyInstance) {
   }
 
   // The site's icons (site/brand/): the standard ones, then any others it keeps at the root.
-  for (const icon of ["favicon.ico", "icon.png", "icon-192.png", "apple-icon.png", "logo.svg", ...SITE.rootIcons]) {
+  for (const icon of ["favicon.ico", "favicon-v2.ico", "icon.png", "icon-v2.png", "icon-192.png", "icon-192-v2.png", "apple-icon.png", "apple-icon-v2.png", "logo.svg", ...SITE.rootIcons]) {
     app.get(`/${icon}`, (req, reply) => sendFile(req, reply, path.join(BRAND, icon), { cacheControl: ICON_CACHE }));
   }
 

@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
+  "dependencies": {
+    "@aihot/mafi-readers": "*",
+    "@aihot/mafi-preferences": "*"
+  },
   "exports": {
     ".": "./site.ts",
     "./models": "./models.ts",

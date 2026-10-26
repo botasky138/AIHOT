@@ -6,8 +6,9 @@ import { Sheet } from "../../components/ui/Sheet";
 import { IconBookmark, IconExternal, IconList, IconShare } from "../../components/icons";
 import { useStar } from "../feed/parts";
 import type { FeedItemSummary } from "@aihot/contracts/site";
+import { ModuleItemActions } from "./ModuleItemActions";
 
-type Starrable = Pick<FeedItemSummary, "id" | "title" | "summary" | "source" | "publishedAt" | "score" | "selected">;
+type Starrable = Pick<FeedItemSummary, "id" | "title" | "summary" | "source" | "publishedAt" | "score" | "selected" | "myVote">;
 
 /** True while the reader is scrolling down through the page (not near its top or end). */
 function useReadingDown(): boolean {
@@ -70,7 +71,10 @@ export function ReaderToolbar({ item, originalUrl, originalLabel, onOutline, onS
       aria-label="阅读工具"
       className={`fixed inset-x-0 bottom-0 z-40 bg-surface/90 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] shadow-[0_-1px_0_var(--line)] backdrop-blur-xl backdrop-saturate-150 transition-transform duration-300 ease-[var(--ease-out-quart)] lg:hidden ${hidden ? "translate-y-full" : ""}`}
     >
-      <div className={`mx-auto grid h-[50px] max-w-[640px] ${onOutline ? "grid-cols-4" : "grid-cols-3"}`}>
+      <div className={`mx-auto grid h-[50px] max-w-[640px] ${onOutline ? "grid-cols-5" : "grid-cols-4"}`}>
+        <div className="flex items-center justify-center">
+          <ModuleItemActions itemId={item.id} myVote={item.myVote} placement="phone" />
+        </div>
         <Tool
           pressed={star.on}
           onClick={star.toggle}

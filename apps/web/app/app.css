@@ -6,8 +6,8 @@
 @source "../../../modules/*/{web.tsx,web/**}";
 
 /* ---------------------------------------------------------------------------
-   Design tokens: warm off-white paper, ink text, one teal accent (cyan in
-   dark), hairline borders, no gradients.
+   Design tokens: black-gold mechanical / metal tech. Near-black bases, cold gray
+   metal borders, champagne-gold accents; fine grid texture. Hard tech, not soft neon glow.
    Components use the semantic names below; values change per theme only.
    --------------------------------------------------------------------------- */
 
@@ -92,29 +92,29 @@
   --gutter-l: max(16px, env(safe-area-inset-left));
   --gutter-r: max(16px, env(safe-area-inset-right));
   color-scheme: light;
-  --bg: #faf9f6;
-  --bg-sunk: #f3f3ef;
-  --bg-muted: #e9ede9;
+  --bg: #f4f4f6;
+  --bg-sunk: #ececef;
+  --bg-muted: #e2e2e6;
   /* Sunk fills: wells, pill tracks, search fields, quiet badges. */
   --well: var(--bg-sunk);
-  --surface: #ffffff;
-  --surface-2: #fdfdfb;
+  --surface: #fafafa;
+  --surface-2: #f7f7f9;
   --raised: #ffffff;
-  --sidebar: #fdfdfb;
-  --daybar: #f0f2ee;
-  --ink: #202a30;
-  --ink-2: #303c42;
-  --ink-3: #59656b;
-  --ink-4: #657176;
-  --line: #dfe4e1;
-  --line-strong: #d1d9d5;
-  --line-soft: #e9ede9;
-  --accent: #176b75;
-  --accent-ink: #145f68;
-  --accent-soft: rgba(23, 107, 117, 0.08);
-  --accent-softer: rgba(23, 107, 117, 0.05);
+  --sidebar: #f0f0f3;
+  --daybar: #eaeaee;
+  --ink: #16161a;
+  --ink-2: #2a2a30;
+  --ink-3: #5a5a64;
+  --ink-4: #6e6e78;
+  --line: #c8c8d0;
+  --line-strong: #a8a8b0;
+  --line-soft: #dcdce2;
+  --accent: #a8861c;
+  --accent-ink: #8a6e14;
+  --accent-soft: rgba(168, 134, 28, 0.1);
+  --accent-softer: rgba(168, 134, 28, 0.06);
   --accent-contrast: #ffffff;
-  --note: #526f72;
+  --note: #6a6458;
   --hot: #b3402a;
   --hot-soft: rgba(179, 64, 42, 0.08);
   --amber: #b8873a;
@@ -127,20 +127,20 @@
   --rank-2: #a3642f;
   --rank-3: #96702e;
   --rank-rest: #6b7684;
-  --shadow-card: 0 1px 2px rgba(32, 42, 48, 0.025);
-  --shadow-card-hover: 0 3px 12px rgba(32, 42, 48, 0.055);
-  --shadow-soft: 0 4px 12px rgba(28, 39, 51, 0.06);
-  --shadow-thumb: 0 1px 2px rgba(28, 39, 51, 0.1), 0 1px 1px rgba(28, 39, 51, 0.04);
-  --shadow-pop: 0 12px 32px rgba(28, 39, 51, 0.12);
-  --prose-ink: #26323a;
-  --code-bg: #f6f7f4;
-  --code-keyword: #006d77;
-  --code-string: #2f6f44;
+  --shadow-card: 0 1px 2px rgba(10, 10, 12, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --shadow-card-hover: 0 4px 14px rgba(10, 10, 12, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-soft: 0 4px 12px rgba(10, 10, 12, 0.08);
+  --shadow-thumb: 0 1px 2px rgba(10, 10, 12, 0.12), 0 1px 1px rgba(10, 10, 12, 0.05);
+  --shadow-pop: 0 12px 32px rgba(10, 10, 12, 0.14);
+  --prose-ink: #1e1e24;
+  --code-bg: #ececef;
+  --code-keyword: #8a6e14;
+  --code-string: #3b6ea5;
   --code-number: #9a6700;
   --code-title: #6f42c1;
   --code-variable: #a13d10;
   --code-meta: #b42348;
-  --selection: rgba(23, 107, 117, 0.16);
+  --selection: rgba(168, 134, 28, 0.18);
 }
 
 @media (min-width: 961px) {
@@ -151,32 +151,32 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #13191c;
-  --bg-sunk: #182024;
-  --bg-muted: #202a2f;
-  --well: color-mix(in oklab, var(--bg-muted) 60%, transparent);
-  --surface: #1a2226;
-  --surface-2: #1d272b;
-  --raised: #202a2f;
-  --sidebar: #161e21;
-  --daybar: #182024;
-  --ink: #e7eceb;
-  --ink-2: #d2dada;
-  --ink-3: #a5b0b3;
-  --ink-4: #89979d;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.12);
-  --line-soft: rgba(255, 255, 255, 0.06);
-  --accent: #12ccd8;
-  --accent-ink: #2ce2e8;
-  --accent-soft: rgba(18, 204, 216, 0.12);
-  --accent-softer: rgba(18, 204, 216, 0.06);
-  --accent-contrast: #000000;
-  --note: #8fb8a8;
+  --bg: #0a0a0c;
+  --bg-sunk: #101014;
+  --bg-muted: #141418;
+  --well: color-mix(in oklab, var(--bg-muted) 70%, transparent);
+  --surface: #121216;
+  --surface-2: #16161a;
+  --raised: #1a1a1e;
+  --sidebar: #0e0e12;
+  --daybar: #101014;
+  --ink: #e8e8ec;
+  --ink-2: #c8c8d0;
+  --ink-3: #9a9aa4;
+  --ink-4: #6e6e78;
+  --line: #3a3a40;
+  --line-strong: #4a4a52;
+  --line-soft: #2a2a30;
+  --accent: #c9a227;
+  --accent-ink: #e8d48b;
+  --accent-soft: rgba(201, 162, 39, 0.14);
+  --accent-softer: rgba(201, 162, 39, 0.07);
+  --accent-contrast: #0a0a0c;
+  --note: #a8a090;
   --hot: #d86a52;
   --hot-soft: rgba(216, 106, 82, 0.12);
   --amber: #d3b26a;
-  --amber-ink: #d3b26a;
+  --amber-ink: #e8d48b;
   --amber-soft: rgba(211, 178, 106, 0.12);
   --ok: #5fc79a;
   --ok-soft: rgba(95, 199, 154, 0.12);
@@ -185,20 +185,20 @@
   --rank-2: #d18a5e;
   --rank-3: #d3b26a;
   --rank-rest: #7b869a;
-  --shadow-card: none;
-  --shadow-card-hover: none;
-  --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.35);
-  --shadow-thumb: 0 1px 2px rgba(0, 0, 0, 0.45);
-  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.45);
-  --prose-ink: #d7dfdf;
-  --code-bg: #10151c;
-  --code-keyword: #78dce8;
-  --code-string: #a9dc76;
+  --shadow-card: inset 0 1px 0 rgba(232, 212, 139, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+  --shadow-card-hover: inset 0 1px 0 rgba(232, 212, 139, 0.1), 0 0 0 1px rgba(201, 162, 39, 0.22);
+  --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-thumb: 0 1px 2px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.55);
+  --prose-ink: #d4d4da;
+  --code-bg: #0e0e12;
+  --code-keyword: #e8d48b;
+  --code-string: #7eb8e8;
   --code-number: #ffd866;
   --code-title: #ab9df2;
   --code-variable: #fc9867;
   --code-meta: #ff6188;
-  --selection: rgba(18, 204, 216, 0.22);
+  --selection: rgba(201, 162, 39, 0.28);
 }
 
 @layer base {
@@ -210,11 +210,21 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    background: var(--bg);
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-attachment: fixed;
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: 14px;
     line-height: 1.5;
+  }
+  :root:not([data-theme="dark"]) body {
+    background-image:
+      linear-gradient(rgba(10, 10, 12, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(10, 10, 12, 0.035) 1px, transparent 1px);
   }
   ::selection {
     background: var(--selection);
@@ -318,6 +328,14 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
+}
+/* Anodized / brushed panel chrome for sidebar rails and primary metal shells. */
+@utility metal-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 40%),
+    var(--sidebar);
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(232, 212, 139, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 /* The well: a quiet sunk panel for what navigates or annotates rather than reads (the report's 报眼,
    the hot lead's heat panel, notes on about and feedback). Radius is set where it is used. */

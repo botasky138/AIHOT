@@ -8,7 +8,7 @@ import { proxiedImage, proxiedImageSet } from "../media/imgproxy.ts";
 import { behindSources, currentSignals, heatSeries, sourceClocks, type HotRanking } from "../events/hot.ts";
 import { relatedEvidence, RELATED_MIN_REPORTS } from "../events/related.ts";
 import { pickRepresentative, REPRESENTATIVE_COLUMNS, type RepresentativeIdentity } from "./representative.ts";
-import { compositeCondition, evidenceCondition, listedCondition, storyReportCondition } from "./scope.ts";
+import { compositeCondition, evidenceCondition, listedCondition, listingDayFloor, storyReportCondition } from "./scope.ts";
 import { publicSourceName } from "./rules.ts";
 import { latestHotRanking, rankingExtras } from "./hot.ts";
 import { storyTexts } from "./story-text.ts";
@@ -243,19 +243,23 @@ async function queryHotCovers({ entries }: HotRanking) {
 export async function loadHot(): Promise<HotResponse> {
   const ranking = await latestHotRanking();
   if (!ranking) return { computedAt: null, windowHours: 48, entries: [] };
+  const floorMs = listingDayFloor().getTime();
+  const freshHotEntries = ranking.entries.filter((e) => Date.parse(e.latestAt) >= floorMs);
+  if (!freshHotEntries.length) return { computedAt: ranking.computedAt, windowHours: 48, entries: [] };
+  const freshRanking = { ...ranking, entries: freshHotEntries };
   const at = new Date(ranking.computedAt);
   const [sparks, covers, extras] = await Promise.all([
     sparklines(
-      ranking.entries.map((e) => e.storyId),
+      freshHotEntries.map((e) => e.storyId),
       at,
     ),
-    hotCovers(ranking),
-    rankingExtras(ranking),
+    hotCovers(freshRanking),
+    rankingExtras(freshRanking),
   ]);
   return {
     computedAt: ranking.computedAt,
     windowHours: 48,
-    entries: ranking.entries.map((e) => {
+    entries: freshHotEntries.map((e) => {
       const picture = covers.get(e.storyId);
       const coverUrl = picture ? proxiedImage(picture.url, "full") : null;
       const text = extras.text(e);
@@ -280,6 +284,90 @@ export async function loadHot(): Promise<HotResponse> {
     }),
   };
 }
+
+/** Internal hot-window evidence: representatives + participant article ids for preference projection. */
+export interface HotReaderCandidate {
+  itemId: string;
+  sourceId: string;
+  publicBaseScore: number;
+  publicTimeMs: number;
+  groupKey: string;
+}
+
+export interface HotReaderWindow {
+  data: HotResponse;
+  candidates: HotReaderCandidate[];
+}
+
+/**
+ * Public hot ranking plus candidates for entries that have item ids.
+ * publicBaseScore is heat; groupKey is the story public id. Votes never expand/shrink the set.
+ */
+export async function loadHotReaderWindow(): Promise<HotReaderWindow> {
+  const ranking = await latestHotRanking();
+  const data = await loadHot();
+  if (!ranking || !data.entries.length) return { data, candidates: [] };
+
+  const allowed = new Set(data.entries.map((e) => e.story.publicId));
+  const fresh = ranking.entries.filter((e) => allowed.has(e.storyPublicId));
+
+  const storyIds = fresh.map((e) => e.storyId);
+  const repIds = fresh.map((e) => e.representativeItemId).filter((id): id is string => !!id);
+
+  const signalRows = storyIds.length
+    ? await sql<{ story_id: number; article_id: string; source_id: string }[]>`
+        SELECT DISTINCT ss.story_id, ss.article_id, a.source_id
+        FROM story_signals ss JOIN articles a ON a.id = ss.article_id
+        WHERE ss.story_id = ANY(${storyIds}::bigint[])`
+    : [];
+
+  const repSourceRows = repIds.length
+    ? await sql<{ article_id: string; source_id: string }[]>`
+        SELECT p.article_id, p.source_id FROM publications p WHERE p.article_id IN ${sql(repIds)}`
+    : [];
+  const repSource = new Map(repSourceRows.map((r) => [r.article_id, r.source_id]));
+
+  const candidates: HotReaderCandidate[] = [];
+  const seen = new Set<string>();
+
+  for (const e of fresh) {
+    const publicTimeMs = Date.parse(e.latestAt);
+    if (e.representativeItemId) {
+      const sourceId = repSource.get(e.representativeItemId);
+      if (sourceId) {
+        const key = `${e.storyPublicId}:${e.representativeItemId}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          candidates.push({
+            itemId: e.representativeItemId,
+            sourceId,
+            publicBaseScore: e.heat,
+            publicTimeMs,
+            groupKey: e.storyPublicId,
+          });
+        }
+      }
+    }
+  }
+
+  for (const row of signalRows) {
+    const entry = fresh.find((e) => e.storyId === Number(row.story_id));
+    if (!entry) continue;
+    const key = `${entry.storyPublicId}:${row.article_id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    candidates.push({
+      itemId: row.article_id,
+      sourceId: row.source_id,
+      publicBaseScore: entry.heat,
+      publicTimeMs: Date.parse(entry.latestAt),
+      groupKey: entry.storyPublicId,
+    });
+  }
+
+  return { data, candidates };
+}
+
 
 // v1 shapes (ranks and counts only; no heat values)
 
