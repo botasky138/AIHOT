@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-10-26（Asia/Tokyo ~20:45）修/测试与 typecheck（Draft PR #1 分支）
+
+### 摘要
+- 修复 `npm run typecheck`（codex-featured 测试助手缺 CodexEvent 类型）、半径尺度（`rounded-mark` / Logo 去掉 off-scale）、`mafi_preference_devices.user_id` INSERT null（architecture 未用列）。
+- 相关/时间线测试固定日期推到 listing floor 2026-10-23 及之后；日期校正测试改为期待 discovery `sort_at`（与 publish 推广一致）。
+- 本地分支 `fix/mafi-pr1-tests-typecheck`（基于 `codex/mafi-site-and-preferences`）；**未 push**。
+
+| SHA | 说明 |
+|-----|------|
+| 9baf0f5 | typecheck / radius / preference user_id / listing-floor fixtures |
+
+
 ## 2026-10-26（Asia/Tokyo ~15:40）赞/踩阅读偏好：接受测试与操作说明
 
 ### 摘要
