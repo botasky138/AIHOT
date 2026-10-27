@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-10-27（Asia/Tokyo ~14:20）站点更新日志页 + 推送 AA 修复到 botasky138
+
+### 摘要
+- 更新用户可见 `site/changelog.json`（`latestVersion=2026-10-27T14:20`）：AA 模型榜同步、赞/踩阅读偏好、列表近期窗口；并把原「新增」条目改为合约内的「更新」。
+- 将本机 AA 修复（loadDotEnv 去引号）与更新日志相关提交推送到 `botasky138/main`（不 push origin、不 force、不发 GitHub Release、不提交 .env）。
+- 重启 preview API 以清掉 `loadChangelog` 进程内缓存，确认 `/api/site/changelog` 已非 10-22。
+
+| SHA | 说明 |
+|-----|------|
+| PLACEHOLDER | site/changelog.json + 本条 docs |
+
+---
+
 ## 2026-10-27（Asia/Tokyo ~13:40）AA 同步：.env 引号 + loadDotEnv 去引号
 
 ### 摘要
