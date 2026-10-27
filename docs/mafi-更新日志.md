@@ -15,7 +15,7 @@
 
 | SHA | 说明 |
 |-----|------|
-| PLACEHOLDER | site/changelog.json + 本条 docs |
+| 5431e9b | site/changelog.json + 本条 docs |
 
 ---
 
