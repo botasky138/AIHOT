@@ -15,7 +15,7 @@
 
 | SHA | 说明 |
 |-----|------|
-| PLACEHOLDER | prefs Origin loopback + 更新日志 / site changelog |
+| 27f4550 | prefs Origin loopback + 更新日志 / site changelog |
 
 ---
 
