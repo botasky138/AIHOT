@@ -21,7 +21,14 @@ function loadDotEnv(file) {
   for (const line of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
     if (!line || line.startsWith("#") || !line.includes("=")) continue;
     const i = line.indexOf("=");
-    out[line.slice(0, i)] = line.slice(i + 1);
+    let value = line.slice(i + 1);
+    if (
+      (value.startsWith('"') && value.endsWith('"') && value.length >= 2) ||
+      (value.startsWith("'") && value.endsWith("'") && value.length >= 2)
+    ) {
+      value = value.slice(1, -1);
+    }
+    out[line.slice(0, i)] = value;
   }
   return out;
 }

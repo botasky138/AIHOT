@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-10-27（Asia/Tokyo ~13:40）AA 同步：.env 引号 + loadDotEnv 去引号
+
+### 摘要
+- 根因：.env 中 AA_API_KEY 带外层引号，而 scripts/start-mafi-preview.mjs 的 loadDotEnv 未剥离 → 上游 AA free API 401 → ReaderCache 卡在 stale（模型数 709，nextRefreshAt 被失败刷新锁到 +24h）。
+- 修复：备份后去掉 .env 中 AA_API_KEY 外层引号（不提交 .env、不轮换密钥）；loadDotEnv 赋值时剥离首尾单/双引号，避免复发。
+- 强制刷新 .data/preview/mafi-readers/aa-models.json：715 模型，status=ready（非 stale）。
+- Preview api/web/worker 与 auto-loop 已按既有脚本重启；COLLECT/MODEL 保持 .env 原值。
+
+| SHA | 说明 |
+|-----|------|
+| 52181c0 | loadDotEnv 去引号 + 本条更新日志 |
+
+---
+
 ## 2026-10-26（Asia/Tokyo ~20:45）修/测试与 typecheck（Draft PR #1 分支）
 
 ### 摘要
