@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-10-27（Asia/Tokyo ~16:40）赞/踩点击无效：localhost ↔ 127.0.0.1 Origin
+
+### 摘要
+- **根因（有证据）**：`POST /api/site/reactions` 的 `sameOrigin` 要求 `Origin` 与 `config.siteUrl` 字符串全等。`.env` 为 `SITE_URL=http://localhost:3000`，而 preview/`start-mafi-preview` 与用户常用 `http://127.0.0.1:3000` → Origin `http://127.0.0.1:3000` → **403** `cross-origin reaction rejected`；前端 `catch` 静默回滚，表现为「点击无效」。
+- **复现**：同 item，Origin=127 → 403；Origin=localhost → 200 + Set-Cookie。
+- **修复**：`sameSiteOrigin` 在同 scheme/port 下将 localhost / 127.0.0.1 / ::1 视为等价；evil Origin 仍 403。standalone 测试覆盖。重启 API 后经 web 代理 127 与 localhost 别名均 200。
+
+| SHA | 说明 |
+|-----|------|
+| PLACEHOLDER | prefs Origin loopback + 更新日志 / site changelog |
+
+---
+
 ## 2026-10-27（Asia/Tokyo ~14:20）站点更新日志页 + 推送 AA 修复到 botasky138
 
 ### 摘要

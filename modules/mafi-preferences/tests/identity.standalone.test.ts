@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { DEVICE_COOKIE, DEVICE_COOKIE_MAX_AGE_SEC } from "../contracts.ts";
-import { deviceSetCookie, isDeviceId, newDeviceId, readDeviceId } from "../backend/identity.ts";
+import { deviceSetCookie, isDeviceId, newDeviceId, readDeviceId, sameSiteOrigin } from "../backend/identity.ts";
 import { checkReactionLimit, _resetLimitsForTest } from "../backend/limits.ts";
 
 test("device cookie attributes", () => {
@@ -38,4 +38,17 @@ test("rate limit 60/min and burst 10", () => {
   const denied = checkReactionLimit({ deviceId, ip, now: now + 50 * 100 });
   assert.equal(denied.allowed, false);
   assert.ok(denied.retryAfter >= 1);
+});
+
+test("loopback Origin aliases match SITE_URL for reactions CSRF", () => {
+  const siteLocal = "http://localhost:3000";
+  const siteLoop = "http://127.0.0.1:3000";
+  assert.equal(sameSiteOrigin("http://127.0.0.1:3000", siteLocal), true);
+  assert.equal(sameSiteOrigin("http://localhost:3000", siteLoop), true);
+  assert.equal(sameSiteOrigin("http://localhost:3000", siteLocal), true);
+  assert.equal(sameSiteOrigin("http://127.0.0.1:3000", siteLoop), true);
+  assert.equal(sameSiteOrigin("http://127.0.0.1:3001", siteLocal), false);
+  assert.equal(sameSiteOrigin("https://127.0.0.1:3000", siteLocal), false);
+  assert.equal(sameSiteOrigin("https://evil.example", siteLocal), false);
+  assert.equal(sameSiteOrigin("null", siteLocal), false);
 });

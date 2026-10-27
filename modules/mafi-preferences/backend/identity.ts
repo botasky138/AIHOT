@@ -33,3 +33,33 @@ export function readDeviceId(cookieHeader: string | undefined): string | null {
 export function deviceSetCookie(deviceId: string, secure: boolean): string {
   return `${DEVICE_COOKIE}=${encodeURIComponent(deviceId)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${DEVICE_COOKIE_MAX_AGE_SEC}${secure ? "; Secure" : ""}`;
 }
+
+/** Loopback hosts used interchangeably in local preview (SITE_URL vs browser bar). */
+function isLoopbackHost(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  return h === "localhost" || h === "127.0.0.1" || h === "::1";
+}
+
+function effectivePort(u: URL): string {
+  if (u.port) return u.port;
+  return u.protocol === "https:" ? "443" : "80";
+}
+
+/**
+ * CSRF gate for reactions: exact Origin match, or localhost ↔ 127.0.0.1 / ::1
+ * with the same scheme and port (common local-preview mismatch).
+ */
+export function sameSiteOrigin(originHeader: string, site: string): boolean {
+  if (!originHeader || originHeader === "null") return false;
+  if (originHeader === site) return true;
+  try {
+    const o = new URL(originHeader);
+    const s = new URL(site);
+    if (o.protocol !== s.protocol) return false;
+    if (effectivePort(o) !== effectivePort(s)) return false;
+    if (o.hostname === s.hostname) return true;
+    return isLoopbackHost(o.hostname) && isLoopbackHost(s.hostname);
+  } catch {
+    return false;
+  }
+}

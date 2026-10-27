@@ -3,7 +3,7 @@ import { loadItemDetail } from "@aihot/backend/publication/detail";
 import { config } from "@aihot/backend/config";
 import { sql } from "@aihot/backend/db";
 import { ITEM_ID_RE, type Vote } from "../contracts.ts";
-import { deviceSetCookie, newDeviceId, readDeviceId } from "./identity.ts";
+import { deviceSetCookie, newDeviceId, readDeviceId, sameSiteOrigin } from "./identity.ts";
 import { checkReactionLimit } from "./limits.ts";
 import { setReaction } from "./store.ts";
 
@@ -14,8 +14,7 @@ function siteOrigin(): string {
 function sameOrigin(req: FastifyRequest): boolean {
   const site = siteOrigin();
   const origin = req.headers.origin;
-  if (origin === "null") return false;
-  if (origin) return origin === site;
+  if (origin) return sameSiteOrigin(origin, site);
   const fetchSite = String(req.headers["sec-fetch-site"] ?? "");
   if (fetchSite === "cross-site") return false;
   return true;
